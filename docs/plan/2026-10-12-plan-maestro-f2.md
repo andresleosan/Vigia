@@ -19,7 +19,7 @@
 - La bóveda descifra y verifica en el navegador del contacto.
 
 **Hosts (solo gratuitos en F2):**
-- `<host-api>` y `<host-bóveda>`: dos Workers con nombres neutros en el subdominio neutro de workers.dev de una cuenta dedicada. Comparten D1 y R2, y solo el de la API tiene el cron.
+- `<host-api>` y `<host-bóveda>`: dos Workers con nombres neutros en workers.dev, en la cuenta de Cloudflare de la persona responsable (decisión 4: su subdominio de workers.dev no es neutro y H0b decide cómo resolverlo). Comparten D1 y R2, y solo el de la API tiene el cron.
 - `<host-respaldo>`: el mismo código como proyecto de Pages con nombre neutro (modo avanzado, con los mismos D1 y R2), en pages.dev, para que un bloqueo de todo workers.dev no deje sin respaldo. P9 comprueba que es viable.
 - Página de presentación: `vigiaapp.pages.dev`, con el nombre, porque es lo que se promociona. Nunca enlaza a los hosts anteriores, y estos nunca la nombran.
 - Los nombres reales de los hosts neutros viven fuera del repo.
@@ -217,7 +217,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
 - **Objetivo:** medir en el teléfono, en Cloudflare y en VE las incógnitas que pueden cambiar la arquitectura, y dejar cada respuesta en DESIGN.md antes de construir producto que dependa de ellas.
 - **Entregable:** `docs/pico/informe.md` completo (pregunta, medición y decisión por cada P, con marcadores en lugar de hosts reales) y los cambios a DESIGN.md que salen de él. Fuera del repo, los Workers y la página de prueba.
 - **Incluye:**
-  - Cuenta de Cloudflare dedicada, endurecida antes del primer despliegue: 2FA con llave física, subdominio de workers.dev neutro elegido antes de desplegar nada y token de API mínimo con caducidad. Claude despliega solo con wrangler y ese token, con la configuración fuera del repo (CFG-01).
+  - Cuenta de Cloudflare de la persona responsable (decisión 4), endurecida antes del primer despliegue: 2FA con llave física y token de API mínimo con caducidad. Antes de desplegar nada se decide cómo tener hosts neutros, porque el subdominio de workers.dev de esa cuenta no lo es. Claude despliega solo con wrangler y ese token, con la configuración fuera del repo (CFG-01).
   - Teléfono: instalar el banco con adb desde el portátil y correr su autoprueba (FTS5, cabecera de `vault.db`, firma del Keystore y su latencia con TEE y con StrongBox).
   - P2, P3, P4, P5 (parte del teléfono), P6 (navegadores reales), P7, P8 y P9.
   - Audio de prueba sin terceros. Los fragmentos salen cifrados con la clave de escucha de pruebas y se descifran en la máquina de build: el audio en claro no toca el disco del teléfono ni en el pico.
@@ -257,7 +257,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
 - **Requisitos:**
   - teléfono de gama baja (Xiaomi o Redmi con Android 11 a 13 y 2 a 3 GB de RAM) con SIM y datos, excluido del ahorro de batería durante las pruebas y con la depuración USB activada (por eso no sirve para protegerse);
   - adb en el portátil, por USB o con depuración inalámbrica en la red local;
-  - cuenta de Cloudflare dedicada;
+  - cuenta de Cloudflare de la persona responsable, con 2FA por llave;
   - bot de Telegram de prueba con nombre neutro, cuyo token llega por un canal privado y va solo como secreto;
   - persona de confianza en VE con las protecciones de P8;
   - de 4 a 6 h de pruebas con el teléfono.
@@ -1177,7 +1177,7 @@ Vienen de dos revisiones (servidor y criptografía; cliente, app y bóveda) y de
 | SUM-05 | Bóveda reproducible | Build determinista y hashes publicados; `verificar-boveda` | Dos builds dan los mismos hashes | Antes del piloto (F4) |
 | SUM-06 | Repo público | Escaneo de secretos y protección de push; se empuja solo la etiqueta aprobada | Ajustes de GitHub; `git ls-remote` | H0a |
 | SUM-07 | Gradle | Versiones exactas; wrapper con `distributionSha256Sum`; verification-metadata | Revisión de los build.gradle y del wrapper | H1, H2 |
-| OPS-01 | Cuenta de Cloudflare | Cuenta dedicada a Vigía; 2FA con llave; token mínimo con caducidad; subdominio de workers.dev neutro; desplegar desde un árbol limpio; sin conectores con OAuth amplio; revisar el registro de auditoría | Panel y `wrangler whoami` | H0b |
+| OPS-01 | Cuenta de Cloudflare | Cuenta de la persona responsable (decisión 4); 2FA con llave; token mínimo con caducidad; hosts con nombre neutro (H0b); desplegar desde un árbol limpio; conectores con OAuth amplio solo con permiso de la persona responsable; revisar el registro de auditoría | Panel y `wrangler whoami` | H0b |
 | OPS-02 | Plan y abuso | Workers Paid antes del piloto; tope global de altas por hora sin IP, con su cota calculada; el alta en cola nunca impide grabar; limits en wrangler | Por encima del tope: 429 y el teléfono sigue grabando; plan visible en el panel | H1, H3a, H8b |
 | OPS-03 | Entorno de desarrollo | `wrangler dev` y Metro solo en 127.0.0.1; Playwright comparte la red del entorno de build, sin puertos publicados; el APK lleva el bundle dentro; nunca `expo start --tunnel` | `ss -ltnp`; una conexión desde fuera falla | H0a, H1, H2 |
 | VAR-01 | Variantes | release no compila con un pack en draft, sin interruptor; pruebas con la clave de firma de pruebas y la banda de borrador; la clave de escucha, `capturas` y los extras de debug solo en debug y pruebas | `release-check`; `apksigner`; prueba de Gradle sobre los conjuntos de fuentes y el `BuildConfig`; búsqueda en el APK en el primer release | H2, H3a |
@@ -1242,7 +1242,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 14. **Android:** los requisitos AND-01 a AND-19 y SUM-03; notificaciones locales y ubicación con APIs de Android desde Kotlin; lista de dependencias prohibidas.
 15. **Unidad de la cola de subida:** pasa de TypeScript a Kotlin, dentro del servicio, como una sola cola para todo lo firmado con prioridad fija (apertura; SOS y cancelación; desarme y extensión; cierre; latido; fragmentos); tras Detener, el servicio sigue hasta vaciarla; WorkManager de respaldo y pruebas JUnit con reloj virtual; JS solo lee el estado. Motivo: el hilo JS puede pausarse con la pantalla apagada y tras Detener, y entonces la evidencia no saldría antes de que quiten el teléfono.
 16. **M10:** sale el ajuste "datos móviles" en F2.
-17. **Plataforma Cloudflare:** cuenta dedicada; `observability` y trazas desactivadas; sin Logpush ni analítica; Workers Paid antes del piloto; tope global de altas con su cota (LOG-01, BOV-14C, OPS-01 y OPS-02).
+17. **Plataforma Cloudflare:** la cuenta de la persona responsable (decisión 4); `observability` y trazas desactivadas; sin Logpush ni analítica; Workers Paid antes del piloto; tope global de altas con su cota (LOG-01, BOV-14C, OPS-01 y OPS-02).
 18. **Lo que guarda el servidor:** la hora de la última señal solo con el aviso por falta de señales activo, y las filas anti-reenvío se borran a los 10 min (PRIV-01).
 19. **"Qué sale de tu teléfono":** fila de la operadora, que ve a qué dominio te conectas (SNI); para los contactos, que Web Push pasa por Google, Apple o Mozilla.
 20. **Retención (Riesgos abiertos):** ningún borrado automático de incidentes de teléfonos inactivos en la v1 ni en el piloto; se revisa con los datos del piloto y con un custodio legal antes del lanzamiento público.
@@ -1277,7 +1277,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 1. **Entorno de construcción:** se aísla (ENV-01). La persona responsable autoriza crear el entorno de build, el contenedor de Playwright y la red aislada de toxiproxy.
 2. **Commits:** Claude hace commits pequeños en `main` durante cada hito, en español y con las pruebas en verde; al aprobar, etiqueta anotada, y la persona responsable empuja solo la etiqueta.
 3. **Teléfono y herramientas:** gama baja Xiaomi o Redmi con Android 11 a 13 y 2 a 3 GB de RAM; APK instalado con adb desde el portátil (USB o depuración inalámbrica); JDK 17 y SDK de Android en el entorno de build.
-4. **Cloudflare:** cuenta nueva solo para Vigía, con 2FA por llave y subdominio neutro; plan Free hasta antes del piloto; entorno dev público en workers.dev con nombres neutros y datos sintéticos; bot de Telegram de prueba con nombre neutro, cuyo token llega por un canal privado.
+4. **Cloudflare:** la cuenta que ya usa la persona responsable, también en el piloto, con 2FA por llave (cambio del 12-oct-2026; antes, una cuenta nueva solo para Vigía). Plan Free hasta antes del piloto, con los límites compartidos con sus otros proyectos. El subdominio de workers.dev de la cuenta no es neutro: H0b decide cómo tener hosts neutros. Entorno dev público en workers.dev con nombres neutros y datos sintéticos; bot de Telegram de prueba con nombre neutro, cuyo token llega por un canal privado. La persona responsable acepta el riesgo: quien controle esa cuenta controla la bóveda.
 5. **Persona de confianza en VE:** sí, con un Android, en dos operadores si puede, con su consentimiento y una cuenta de Telegram secundaria; su identidad solo vive en el registro privado.
 6. **Dominios:** en F2 solo subdominios gratuitos. La página de presentación es `vigiaapp.pages.dev`, con el nombre, publicada a producción desde GitHub; el servidor de la app, la bóveda y los avisos usan nombres neutros en workers.dev y pages.dev, nunca enlazados desde la página.
 7. **Retención:** ningún borrado automático en la v1 ni en el piloto.
@@ -1300,7 +1300,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 | Proyecto de Pages `vigiaapp` conectado al repo, solo con acceso a Vigia | Publicar la página de presentación | H0a | La página espera |
 | Teléfono Android de gama baja con SIM y datos y la depuración USB activada | H0b y todos los hitos móviles | H0b | H1 se adelanta; H2 no empieza |
 | adb en el portátil (USB o depuración inalámbrica en la red local) y ejecutar los guiones de adb | Instalar APK, Doze, logcat, `run-as`, capturas, pruebas instrumentadas y, en F4, Maestro | H0b | Muchos criterios no se pueden comprobar |
-| Cuenta de Cloudflare dedicada, con 2FA por llave y token mínimo | Workers de prueba, R2, cron y canales reales | H0b | H1 se adelanta; P8 y P9 esperan |
+| Cuenta de Cloudflare de la persona responsable, con 2FA por llave y token mínimo | Workers de prueba, R2, cron y canales reales | H0b | H1 se adelanta; P8 y P9 esperan |
 | Bot de Telegram de prueba y luego el definitivo, con nombre neutro (token por un canal privado) | P8 y H4 | H0b y H4 | Solo Web Push |
 | Persona de confianza en VE, con consentimiento y cuenta de Telegram secundaria | P8 | H0b, antes de H4 | Telegram principal y riesgo declarado |
 | Autorización de cada despliegue de los Workers | Que nada operativo se publique sin permiso | H0b, H3a y H8b | No se despliega |
@@ -1328,7 +1328,7 @@ En F2 no hacen falta ni cuenta de Expo (se compila en la máquina de build), ni 
 - **Límites del plan Free** (10 ms de CPU, 50 subpeticiones externas y 100.000 peticiones al día; además, desde el 1-sep-2026, D1 falla al pasar los límites diarios de filas). Un atacante podría agotarlos durante una ola de detenciones. Consultas con índice y Workers Paid antes del piloto.
 - **Contenido legal erróneo o que instigue.** BORRADOR visible, release bloqueado, prueba de textos y revisión del tono en H2.
 - **El señuelo delata.** Dos revisiones de 2 h con guion (H6 y H8b) y límites declarados.
-- **La cuenta de Cloudflare es la raíz de confianza:** quien la controle sirve otra bóveda. Se mitiga con OPS-01 y, antes del piloto, con SUM-05.
+- **La cuenta de Cloudflare es la raíz de confianza:** quien la controle sirve otra bóveda. Se mitiga con OPS-01 y, antes del piloto, con SUM-05. Es la cuenta que ya usa la persona responsable, compartida con otros proyectos, y ella acepta el riesgo (decisión 4).
 - **Exponer a personas del proyecto.** Nada de nombres en el repo, hooks que lo comprueban, registro privado fuera del repo, informes de cierre privados y protecciones de P8.
 - **Hitos que se alargan.** Ya están partidos (H0, H3, H5 y H8). Si uno pasa de una semana, se vuelve a partir en la parada.
 - **Falsas alarmas a los contactos de prueba.** Saben que son pruebas, y el temporizador corto solo existe en debug.

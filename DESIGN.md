@@ -602,6 +602,7 @@ Al aprobar el plan de F2 (`docs/plan/2026-10-12-plan-maestro-f2.md`) se fijaron 
 | 60 | Escucha en modo base | Las lecturas firmadas usan una clave de lectura con `setUnlockedDeviceRequired`, distinta de la de firma. La envoltura local de `K` es para una pública cuya privada solo se abre con el PIN: grabar no pide el PIN; escuchar, sí, también ante un análisis del teléfono |
 | 61 | Borrado | Detalla la 16. Estados programado, borrando y borrado; durante el borrado, la ingesta de ese incidente responde 409. Nunca se ejecuta con una alerta activa del incidente o del teléfono, tampoco la falta de señales |
 | 62 | Distribución | La clave de firma de release se custodia fuera del repo y de EAS, con copias cifradas, antes del primer APK que salga de los teléfonos de prueba |
+| 63 | Cuenta de Cloudflare | Cambia la 44 y la 55 (12-oct-2026): todo, también el piloto, va en la cuenta de Cloudflare que ya usa la persona responsable, compartida con otros proyectos, en lugar de una cuenta dedicada. Se mantienen el 2FA con llave y el token de API mínimo con caducidad. El subdominio de workers.dev de esa cuenta no es neutro: antes de desplegar nada, H0b decide cómo tener hosts neutros. Los límites del plan Free se comparten con los otros proyectos hasta pasar a Workers Paid, antes del piloto. La persona responsable acepta el riesgo: quien controle esa cuenta controla la bóveda |
 
 ## Modelo de amenaza por país
 
@@ -907,7 +908,7 @@ Perfil que se busca en cada país: un/a abogado/a colegiado/a con práctica pena
 | **Audio en claro** | **Groq (EE. UU.)**, a través del Worker, sin guardarse | **Solo con la transcripción activada** | **Sí: un tercero** |
 | Texto y artículos | Ollama propio, por túnel privado | Solo con la IA activada | Sí, en servidor propio |
 | IP | Red de Cloudflare | Cada conexión | No se guarda en nuestros logs |
-| Nombre del servidor al que te conectas (SNI) | Tu operadora | Cada conexión | Sí: por eso los hosts tienen nombres neutros (decisión 44) |
+| Nombre del servidor al que te conectas (SNI) | Tu operadora | Cada conexión | Sí: por eso los hosts tienen nombres neutros (decisiones 44 y 63) |
 | Avisos push de tus contactos | Google, Apple o Mozilla (según su navegador) | Cuando hay un aviso | Sin contenido |
 | Paquete exportado (audio, registros, firmas y acuses) | Quien tú elijas | Solo si lo exportas | Sí: lo decides tú |
 | Nada | Google / Firebase | Nunca | - |
