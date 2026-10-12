@@ -1,2 +1,5 @@
 #!/bin/sh
-exec python3 -I .githooks/comprobar.py commit-msg "$1"
+set -e
+dir=$(dirname "$0")
+python3 -I "$dir/comprobar.py" commit-msg "$1"
+python3 -I "$dir/comprobar.py" secretos "$1"
