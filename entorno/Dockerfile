@@ -4,10 +4,12 @@ ARG BASE
 FROM ${BASE}
 ARG DEBIAN_FRONTEND=noninteractive
 # Los paquetes salen de una instantánea fechada del archivo de Ubuntu: mismas versiones en cada build.
-# Antes, solo ca-certificates, para llegar a la instantánea por HTTPS (apt lo verifica con su firma).
+# Para llegar a ella por HTTPS hacen falta antes los certificados: salen del archivo vivo, con versión
+# exacta (si el archivo ya no la tiene, el build falla en vez de cambiar), y apt los verifica con su firma.
+ARG APT_ARRANQUE
 ARG APT_SNAPSHOT
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates \
+ && apt-get install -y --no-install-recommends $APT_ARRANQUE \
  && rm -rf /var/lib/apt/lists/* \
  && apt-get update --snapshot "$APT_SNAPSHOT" \
  && apt-get install -y --no-install-recommends --snapshot "$APT_SNAPSHOT" \
