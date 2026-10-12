@@ -202,15 +202,22 @@ def mensaje(ruta):
         return [("mensaje del commit", None, f.read())]
 
 
-def objeto_git(sha, clase, identidad):
-    """Piezas de un commit o de una etiqueta anotada: su mensaje y cada autor que no sea la
-    identidad configurada en el repo."""
+def identidades_publicas():
+    """Autores que la persona responsable aprobó publicar, en la configuración local:
+    git config --add vigia.identidad-publica 'Nombre <correo>'. Coincidir con user.name y
+    user.email no basta: una identidad cambiada por error no debe salir sin revisar."""
+    r = subprocess.run(["git", "config", "--get-all", "vigia.identidad-publica"], capture_output=True, text=True)
+    return {l.strip().encode() for l in r.stdout.splitlines() if l.strip()}
+
+
+def objeto_git(sha, clase, aprobadas):
+    """Piezas de un commit o de una etiqueta anotada: su mensaje y cada autor no aprobado."""
     cabecera, _, texto = git("cat-file", clase, sha).partition(b"\n\n")
     donde = f"{'commit' if clase == 'commit' else 'etiqueta'} {sha[:7]}: "
     piezas = [(donde + "mensaje", None, texto)]
     for linea in cabecera.split(b"\n"):
         m = re.fullmatch(rb"(author|committer|tagger) (.*) <(.*)> \d+ [+-]\d{4}", linea)
-        if m and (m.group(2), m.group(3)) != identidad:
+        if m and m.group(2) + b" <" + m.group(3) + b">" not in aprobadas:
             piezas.append((donde + m.group(1).decode(), None, m.group(2) + b" <" + m.group(3) + b">"))
     return piezas
 
@@ -220,17 +227,19 @@ def empujado(remoto, lineas):
     refs = [l.split() for l in lineas if l.strip()]
     ya_publicado = [r for *_, r in refs if r != CEROS
                     and subprocess.run(["git", "cat-file", "-e", r], capture_output=True).returncode == 0]
-    identidad = (config("user.name").encode(), config("user.email").encode())
+    aprobadas = identidades_publicas()
     piezas, vistos, revisados = [], set(), set()
-    for ref, sha, _, _ in refs:
+    for ref, sha, ref_remota, _ in refs:
         if sha == CEROS:
             continue  # borrar una referencia remota no publica nada
         revisados |= revisados_en(sha)
-        piezas.append(("nombre de la referencia", None, ref.encode()))
+        # Se publica el nombre remoto (HEAD:refs/heads/<nombre>), pero se revisan los dos.
+        piezas += [("nombre de la referencia", None, ref.encode()),
+                   ("nombre de la referencia remota", None, ref_remota.encode())]
         if git("cat-file", "-t", sha).strip() == b"tag":
-            piezas += objeto_git(sha, "tag", identidad)
+            piezas += objeto_git(sha, "tag", aprobadas)
         for c in git("rev-list", sha, "--not", f"--remotes={remoto}", *ya_publicado).decode().split():
-            piezas += objeto_git(c, "commit", identidad)
+            piezas += objeto_git(c, "commit", aprobadas)
             for ruta, modo, objeto in entradas(git("diff-tree", "-r", "--root", "-m", "--no-commit-id",
                                                     *DIFF, c)):
                 if (ruta, objeto) not in vistos:

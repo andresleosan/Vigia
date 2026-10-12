@@ -309,11 +309,16 @@ class PruebasConGitleaks(Base):
             ("autor ajeno", ["--no-verify", "--allow-empty", f"--author={autor}", "-m", "Prueba"],
              "HEAD:refs/heads/main"),
             ("etiqueta", None, "refs/tags/f2-prueba"),
+            ("nombre remoto", ["--allow-empty", "-m", "Prueba"], "HEAD:refs/heads/zoila-ficticia"),
+            ("identidad configurada no aprobada", ["--no-verify", "--allow-empty", "-m", "Prueba"],
+             "HEAD:refs/heads/main"),
         )
         for caso, orden, destino in casos:
             with self.subTest(caso=caso):
                 if caso == "commit sin hooks":
                     self.preparar(tel("Llama al 0412 55", "5 1234\n"), nombre="b.txt")
+                if caso == "identidad configurada no aprobada":
+                    self.git("config", "user.email", f"prueba{ARROBA}correo.com")
                 if orden:
                     self.assertEqual(self.commit(*orden).returncode, 0)
                 else:
@@ -322,10 +327,14 @@ class PruebasConGitleaks(Base):
                 self.assertNotEqual(r.returncode, 0)
                 self.assertIn("Rechazado", r.stderr)
                 self.git("reset", "-q", "--hard", "origin/main")
+                self.git("config", "user.email", f"prueba{ARROBA}example.invalid")
                 if not orden:
                     self.git("tag", "-d", "f2-prueba")
+        # Una identidad personal aprobada de forma explícita sí se publica.
+        self.git("config", "user.email", f"prueba{ARROBA}correo.com")
+        self.git("config", "vigia.identidad-publica", f"prueba <prueba{ARROBA}correo.com>")
         self.preparar("Otro texto limpio\n", nombre="c.txt")
-        self.commit("-m", "Sigue limpio")
+        self.commit("--no-verify", "-m", "Sigue limpio")
         self.git("tag", "-a", "f2-prueba", "-m", "Hito aprobado")
         r = self.push("HEAD:refs/heads/main", "refs/tags/f2-prueba")
         self.assertEqual(r.returncode, 0, r.stderr)
