@@ -1,0 +1,45 @@
+:root {
+  color-scheme: light dark;
+  --fondo: #F6F7F5;
+  --tinta: #1B1E1D;
+  --secundario: #4A4F4C;
+  --ambar: #F2A900;
+  --tinta-sobre-ambar: #1B1E1D;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #151817;
+    --tinta: #ECEEEA;
+    --secundario: #B9BEBA;
+  }
+}
+
+html {
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 1rem/1.5 system-ui, sans-serif;
+}
+
+body { margin: 0; }
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0 0 1.5rem;
+}
+
+.cuidado {
+  background: var(--ambar);
+  color: var(--tinta-sobre-ambar);
+  border: 2px solid var(--tinta-sobre-ambar);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
