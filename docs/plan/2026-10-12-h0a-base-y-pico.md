@@ -114,7 +114,9 @@ RUN chmod 755 /usr/local/bin/sincronizar \
 USER vigia
 # Las fuentes son de otro usuario y se leen en solo lectura.
 RUN git config --global --add safe.directory /fuente/vigia \
- && git config --global --add safe.directory /fuente/banco
+ && git config --global --add safe.directory /fuente/vigia/.git \
+ && git config --global --add safe.directory /fuente/banco \
+ && git config --global --add safe.directory /fuente/banco/.git
 ENV PATH="/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${PATH}" \
     WRANGLER_SEND_METRICS=false \
     NEXT_TELEMETRY_DISABLED=1 \
@@ -283,8 +285,10 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 - Crear: `.githooks/comprobar.py`, `.githooks/test_comprobar.py`, `.githooks/pre-commit` y `.githooks/commit-msg`.
 
 **Interfaces:**
-- Produce: `comprobar.py pre-commit`, `comprobar.py commit-msg <archivo>` y `comprobar.py huellas-desde <archivo>`. Devuelve 0 si todo está bien y 1 si rechaza; nunca imprime el texto que coincidió, solo la regla y el archivo.
+- Produce: `comprobar.py pre-commit`, `comprobar.py commit-msg <archivo>`, `comprobar.py secretos [<archivo>]` y `comprobar.py huellas-desde <archivo>`. Devuelve 0 si todo está bien y 1 si rechaza; nunca imprime el texto que coincidió, solo la regla y el archivo.
 - Lee de la configuración local de git: `vigia.patrones` (ruta de la lista privada) y `vigia.gitleaks` (imagen de gitleaks fijada por digest). Ninguna ruta de la máquina va al repo.
+
+> Nota del 12-oct-2026, al ejecutar: una revisión de seguridad encontró que la versión de abajo, que interpreta la salida de `git diff`, se podía saltar sin querer. Con `commit -a`, gitleaks leía el índice viejo y un token entraba. Las rutas con tildes, `diff.noprefix`, `.gitattributes` con `binary`, las líneas con `#` del mensaje y una lista de patrones vacía también dejaban pasar texto. El código vigente está en `.githooks/` (commits "Hace que los hooks revisen lo que de verdad entra en el commit" y "Revisa también lo que esconden la tijera, los invisibles y UTF-16"). Las reglas y gitleaks (`comprobar.py secretos`, por stdin y sin montar nada) reciben las mismas lecturas de los blobs del índice y revisan la ruta, el archivo completo y el mensaje entero; una lista de patrones mal formada bloquea. El código de abajo queda como registro del plan.
 
 - [ ] **Paso 1: escribir las pruebas que fallan, `.githooks/test_comprobar.py`**
 
@@ -843,7 +847,7 @@ Sin remoto: `git remote -v` no muestra nada.
 docker exec vigia-build sh -c 'cd /work && rm -rf andamio && npx --yes create-expo-app@5.0.0 andamio --template blank-typescript@sdk-57 --no-install && rm -rf /salida/andamio && cp -r andamio /salida/andamio'
 ```
 
-Expected: `/salida/andamio/package.json` con `"expo": "~57.0.…"`. Copiarlo a `app/` del banco.
+Expected: `/salida/andamio/package.json` con `"expo": "~57.0.…"`. Copiarlo a `app/` del banco sin su `.git`, `AGENTS.md` ni `LICENSE`: la plantilla crea ahí un repositorio git vacío que impide hacer commit en el banco.
 
 - [ ] **Paso 3: fijar versiones y op-sqlite con SQLCipher y FTS5**
 
@@ -1230,7 +1234,7 @@ if (fallos) process.exit(1);
 set -eu
 cd "$(dirname "$0")"
 python3 -I extraer.py
-J="java -cp bcprov-jdk18on-1.86.jar Hpke.java"
+J="java -Dfile.encoding=UTF-8 -cp bcprov-jdk18on-1.86.jar Hpke.java"  # la JVM 17 con locale POSIX no lee ni escribe UTF-8 sin esto
 $J vectores
 $J sellar
 $J firmar
