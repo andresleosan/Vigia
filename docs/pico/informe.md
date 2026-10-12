@@ -11,7 +11,7 @@ Todas publicadas hace 7 días o más el 12-oct-2026.
 | Pieza | Versión | Comprobación |
 |---|---|---|
 | Imagen base del entorno de build | ubuntu:24.04 | digest `sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55` |
-| Paquetes de apt | instantánea del archivo de Ubuntu `20261005T000000Z` | `apt-get --snapshot`: las mismas versiones en cada build |
+| Paquetes de apt | instantánea del archivo de Ubuntu `20261005T000000Z`; antes, para llegar a ella, ca-certificates 20260601~24.04.1 y openssl y libssl3t64 3.0.13-0ubuntu3.16 con versión exacta | `apt-get --snapshot`: las mismas versiones en cada build, o el build falla |
 | JDK | OpenJDK 17.0.20.1 (`17.0.20.1+1-1~24.04`, de la instantánea) | `javac -version` y `jlink --version` |
 | Node | 24.21.0 | SHA-256 `fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6` |
 | pnpm | 12.9.1 | SHA-256 `44c80447645c2a1d8da9308d3efedcec6ca2db4579183abcb15d8a90a88277d4` (coincide con el SHA-512 del registro) |
