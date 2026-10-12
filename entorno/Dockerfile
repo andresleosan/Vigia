@@ -3,8 +3,15 @@
 ARG BASE
 FROM ${BASE}
 ARG DEBIAN_FRONTEND=noninteractive
+# Los paquetes salen de una instantánea fechada del archivo de Ubuntu: mismas versiones en cada build.
+# Antes, solo ca-certificates, para llegar a la instantánea por HTTPS (apt lo verifica con su firma).
+ARG APT_SNAPSHOT
 RUN apt-get update \
- && apt-get install -y --no-install-recommends openjdk-17-jdk-headless git curl unzip rsync ca-certificates python3 xz-utils ffmpeg \
+ && apt-get install -y --no-install-recommends ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && apt-get update --snapshot "$APT_SNAPSHOT" \
+ && apt-get install -y --no-install-recommends --snapshot "$APT_SNAPSHOT" \
+      openjdk-17-jdk-headless git curl unzip rsync python3 xz-utils ffmpeg \
  && rm -rf /var/lib/apt/lists/*
 ARG NODE_VERSION
 ARG NODE_SHA256
@@ -12,30 +19,43 @@ RUN curl -fsSLo /tmp/node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-
  && echo "${NODE_SHA256}  /tmp/node.tar.xz" | sha256sum -c - \
  && tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
  && rm /tmp/node.tar.xz
+ARG PNPM_VERSION
+ARG PNPM_SHA256
+RUN curl -fsSLo /tmp/pnpm.tgz "https://registry.npmjs.org/pnpm/-/pnpm-${PNPM_VERSION}.tgz" \
+ && echo "${PNPM_SHA256}  /tmp/pnpm.tgz" | sha256sum -c - \
+ && npm install -g --ignore-scripts /tmp/pnpm.tgz \
+ && rm /tmp/pnpm.tgz
 ENV ANDROID_HOME=/opt/android-sdk
 ARG CMDLINE_TOOLS_ZIP
 ARG CMDLINE_TOOLS_SHA256
+ARG PLATFORM_TOOLS_ZIP
+ARG PLATFORM_TOOLS_SHA256
 RUN curl -fsSLo /tmp/clt.zip "https://dl.google.com/android/repository/${CMDLINE_TOOLS_ZIP}" \
  && echo "${CMDLINE_TOOLS_SHA256}  /tmp/clt.zip" | sha256sum -c - \
  && mkdir -p "$ANDROID_HOME/cmdline-tools" \
  && unzip -q /tmp/clt.zip -d "$ANDROID_HOME/cmdline-tools" \
  && mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest" \
- && rm /tmp/clt.zip
-COPY sincronizar.sh /usr/local/bin/sincronizar
-RUN chmod 755 /usr/local/bin/sincronizar \
- && useradd -m -u 1001 -s /bin/bash vigia \
- && mkdir -p /work && chown vigia:vigia /work \
- && chown -R vigia:vigia "$ANDROID_HOME"
-USER vigia
-# Las fuentes son de otro usuario y se leen en solo lectura.
-RUN git config --global --add safe.directory /fuente/vigia \
- && git config --global --add safe.directory /fuente/vigia/.git \
- && git config --global --add safe.directory /fuente/banco \
- && git config --global --add safe.directory /fuente/banco/.git
+ && curl -fsSLo /tmp/pt.zip "https://dl.google.com/android/repository/${PLATFORM_TOOLS_ZIP}" \
+ && echo "${PLATFORM_TOOLS_SHA256}  /tmp/pt.zip" | sha256sum -c - \
+ && unzip -q /tmp/pt.zip -d "$ANDROID_HOME" \
+ && rm /tmp/clt.zip /tmp/pt.zip
 ENV PATH="/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:${PATH}" \
     WRANGLER_SEND_METRICS=false \
     NEXT_TELEMETRY_DISABLED=1 \
     EXPO_NO_TELEMETRY=1
 # Instalar el SDK implica aceptar sus licencias (autorizado en la decisión 3 de F1).
-RUN yes | sdkmanager --licenses > /dev/null && sdkmanager --install "platform-tools"
+# Lo instala root con versión exacta (sdkmanager comprueba cada paquete contra el manifiesto de Google)
+# y queda de solo lectura: ni Gradle ni el código de terceros pueden bajar ni cambiar herramientas.
+ARG SDK_PAQUETES
+RUN yes | sdkmanager --licenses > /dev/null \
+ && sdkmanager --install $SDK_PAQUETES > /dev/null \
+ && chmod -R a-w "$ANDROID_HOME"
+COPY sincronizar.sh /usr/local/bin/sincronizar
+RUN chmod 755 /usr/local/bin/sincronizar \
+ && useradd -m -u 1001 -s /bin/bash vigia \
+ && mkdir -p /work && chown vigia:vigia /work
+USER vigia
+# El banco se lee en solo lectura y es de otro usuario. El .git del repo no se monta (ver archivo privado).
+RUN git config --global --add safe.directory /fuente/banco \
+ && git config --global --add safe.directory /fuente/banco/.git
 WORKDIR /work
