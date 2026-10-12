@@ -1,0 +1,8 @@
+# Blobs que una persona revisó y que los hooks no pueden juzgar solos (ver .githooks/comprobar.py).
+# Formato: SHA-256 del contenido, dos espacios y una descripción sin datos personales.
+61fc662f01996cd06d713dacf5e133167bd309a1f329442d53f1e21a47b3ede6  test-vectors.json de cfrg/draft-irtf-cfrg-hpke@5f503c56: vectores públicos; gitleaks marca sus claves de prueba
+a2b235c1f95e9902dd1c7479a736647fd60d0bfb385d05c506b1ddeef27003dd  .githooks/test_comprobar.py del commit cdf4a9b: teléfonos ficticios de prueba (555)
+2bd43df16811fe3d506d7b18d4498626d3c72075cbf5f327e272a6d2885916e2  .githooks/test_comprobar.py del commit 5f30311: teléfonos ficticios de prueba (555)
+f83ae2a872569d18190932452e74874bbd4500a757baec7aae59bae272d46a66  .githooks/test_comprobar.py del commit 87bc6c7: teléfonos ficticios de prueba (555)
+de07cebe823e823109548f667c525f4cdab26658762d01e732791e9f6e16193a  docs/plan/2026-10-12-h0a-base-y-pico.md del commit 43ff887: copia del código de prueba con teléfonos ficticios (555)
+f2c4e913c39b0b3b9384824bd171c3c80eb3f4eedb002588af76088fcc45755f  docs/plan/2026-10-12-h0a-base-y-pico.md del commit e376d39: copia del código de prueba con teléfonos ficticios (555)
