@@ -29,7 +29,7 @@ Ninguna de las herramientas revisadas (Tella, ProofMode, eyeWitness, Mobile Just
 
 - Encuentros de 1 a 60 min en alcabalas, en la calle o en detenciones. En Venezuela la revisión del teléfono es habitual: en 29 de 58 casos documentados obligaron a desbloquearlo y en 14 se lo llevaron fuera de la vista (DFRLab y VE sin Filtro, *Watch the Watchers*, marzo de 2026).
 - En Venezuela la red está censurada e intervenida. Quedarse sin red durante el encuentro es normal, no un error.
-- Superficies: app Android (modo Operate) y bóveda web mínima (modo Operate/Read) que abren los contactos.
+- Superficies: app Android (modo Operate), bóveda web mínima (modo Operate/Read) que abren los contactos y página de presentación (modo Persuade) en vigiaapp.pages.dev.
 - Cada país es un paquete de datos (CountryPack): primero VE, luego CO.
 
 ## Capabilities and Constraints

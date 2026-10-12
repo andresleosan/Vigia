@@ -133,7 +133,7 @@ components:
 
 # Design System: Vigía
 
-> **Estado:** F0 aprobado el 12-oct-2026, tras revisarlo con la especificación "Acompáñame": se confirmaron las decisiones 28 a 38 y se mantuvo lo vigente en los choques C1 a C7 (sección "Revisión con la especificación Acompáñame"). Los tokens son provisionales hasta que la primera construcción de F2 los confirme.
+> **Estado:** F0 aprobado el 12-oct-2026, tras revisarlo con la especificación "Acompáñame": se confirmaron las decisiones 28 a 38 y se mantuvo lo vigente en los choques C1 a C7 (sección "Revisión con la especificación Acompáñame"). Los tokens son provisionales hasta que la primera construcción de F2 los confirme. F1 aprobado el 12-oct-2026: las decisiones 39 a 62 están en la sección "Decisiones de F1".
 > **Formato:** las 8 primeras secciones usan los encabezados canónicos en inglés del formato DESIGN.md, porque los leen herramientas como impeccable. El resto del documento son decisiones del proyecto, en español.
 > **Contexto de producto:** `PRODUCT.md`.
 
@@ -297,7 +297,7 @@ El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en 
 
 **Rombo temporizador**
 - 112 dp, ámbar con borde de tinta, `mm:ss` en cifras tabulares.
-- Debajo: "Aviso automático en 24:10" y "Extender 30 min" (un toque, sin PIN).
+- Debajo: "Aviso automático en 24:10" y "Extender 30 min" (un toque, sin PIN; la tercera extensión seguida pide el PIN, decisión 50).
 - Sin red: "El aviso automático se activará cuando haya conexión".
 
 **Banner de estado**
@@ -313,7 +313,7 @@ El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en 
 
 **Teclado de PIN** (sin camuflaje)
 - Teclas de todo el ancho y puntos de progreso.
-- Si fallas: "PIN incorrecto. Te quedan 2 intentos". Tras 5 fallos, espera exponencial desde 30 s.
+- Si fallas: "PIN incorrecto." y, desde el tercer fallo, "Te quedan N intentos antes de esperar". Tras 5 fallos, espera exponencial desde 30 s, también tras reiniciar (decisión 51).
 - Nunca muestra el alias ni datos de la persona.
 
 **Fila de contacto**
@@ -334,10 +334,10 @@ El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en 
 - **Encabezado de estado:** rombo ámbar con "Alerta activa desde hace 23 min · sin noticias desde 14:32", o "Alerta cancelada a las 15:10". Debajo va siempre "Esto no confirma qué pasó" y, si otro contacto ya abrió el aviso, "Otro contacto lo abrió a las 14:12", sin nombres.
 - **Cronología:** tramo vertical con hitos y la hora a la izquierda, en lenguaje llano ("Alerta creada", "Aviso entregado a ti", "14 fragmentos recibidos").
 - **Reproductor:** elemento `<audio>` nativo sobre los fragmentos ADTS descifrados y unidos.
-- **Posiciones** (si la persona activó la ubicación): lista con hora, coordenadas y precisión ("±40 m"). La última va destacada con "Abrir en mapas" y "Copiar". Los huecos se dicen ("Sin posición entre 14:20 y 14:31") y nunca se dibuja un trayecto entre puntos.
+- **Posiciones** (si la persona activó la ubicación): lista con hora, coordenadas y precisión ("±40 m"). La última va destacada con "Copiar" como acción principal; "Abrir en mapas" avisa antes de mandar la posición a otra app. Los huecos se dicen ("Sin posición entre 14:20 y 14:31") y nunca se dibuja un trayecto entre puntos.
 - **Transcripción** (si existe): marcada como derivada ("Transcripción automática: puede tener errores; manda el audio") y escrita siempre con `textContent`, nunca con `innerHTML`.
 - **Interruptor "Ver prueba"** (rayos X): bajo cada fragmento muestra, en una capa alineada, `seq`, hash corto, firma ✓, acuse con la hora del servidor y la marca "posterior a la alerta" si corresponde. En móvil alterna a pantalla completa.
-- **Botones:** "Descargar paquete" (audio, registros, firmas, acuses, registro de accesos e instrucciones de verificación) y "Extender 7 días".
+- **Botones:** "Descargar paquete" (audio, registros, firmas, acuses, registro de accesos e instrucciones de verificación; con aviso previo y nombre neutro) y "Extender 7 días".
 - **Guía del país:** el `contactGuide` del pack, visible también **antes** de cualquier alerta.
 - **Aviso:** "Avísame por Telegram", "Avísame en este navegador" y "Probar".
 
@@ -358,7 +358,7 @@ El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en 
 - No escribir "Vigía" ni "grabando" en la fachada, sus etiquetas de accesibilidad, la notificación del servicio ni los recordatorios.
 - No usar el ámbar como texto sobre fondo claro, ni como superficie grande.
 - Nada de terceros en la bóveda: ni fuentes externas, ni mapas incrustados, ni analítica, ni CDN.
-- Nunca la raya larga (—) en los textos de la interfaz.
+- Nunca la raya larga (U+2014) en los textos de la interfaz.
 - No inventar cifras, testimonios, logos ni contactos de organizaciones sin validar.
 - No mostrar consejo legal de un pack sin validar en una build de producción.
 
@@ -388,7 +388,7 @@ Las referencias de Mobbin están en la sección Referencias. Todas son de iOS y 
    - QR → el contacto escanea → elige el canal → **Probar alerta** → "✓ Ana recibió la prueba".
    - Si se salta, queda un aviso permanente: "Sin contactos, el SOS no avisa a nadie".
 
-**Recuperar con código** (avanzado, en otro teléfono): en la primera pantalla, "Tengo un código de recuperación" lleva al flujo H en lugar de la configuración.
+**Recuperar con código** (en otro teléfono; avanzado, o base si se activó en M10): en la primera pantalla, "Tengo un código de recuperación" lleva al flujo H en lugar de la configuración.
 
 ### Uso diario
 | # | Pantalla | Contenido | Estados |
@@ -403,7 +403,7 @@ Las referencias de Mobbin están en la sección Referencias. Todas son de iOS y 
 | M7 | Incidentes | Lista con estado de subida | Vacío ("Tus grabaciones aparecerán aquí") · en cola · interrumpido · borrado programado |
 | M8 | Detalle de incidente | Base: reproductor, verificación y "Exportar paquete" (PIN). Avanzado: "Abrir con código" | Pendiente de subir · cierre pendiente de confirmar · borrado programado (Deshacer) |
 | M9 | Contactos | Hasta 3 filas de contacto, añadir (QR o mensaje), probar, revocar | Invitación vencida · canal caído · tope alcanzado |
-| M10 | Ajustes | País, modo, camuflaje, temporizador por defecto (15/30/60/120), aviso por falta de señales (apagado, 12, 24 o 48 h; pausar hasta una fecha), datos móviles, transcripción (Groq), IA, ubicación, PINs, código de recuperación, "Qué sale de tu teléfono" | Cada interruptor con su consecuencia en una línea · pausa pendiente de confirmar |
+| M10 | Ajustes | País, modo, camuflaje, temporizador por defecto (15/30/60/120), aviso por falta de señales (apagado, 12, 24 o 48 h; pausar hasta una fecha), transcripción (Groq, después de F2), IA (después de F2), ubicación, PINs, código de recuperación, "Qué sale de tu teléfono" | Cada interruptor con su consecuencia en una línea · pausa pendiente de confirmar |
 | M11 | Señuelo | Vigía "recién instalada": sin incidentes ni contactos; las tarjetas funcionan | Debe aguantar una revisión de horas sin incoherencias |
 
 **Activar la transcripción** (M10) sigue el patrón de consentimiento de ANZ: nombra al tercero (Groq, EE. UU.), el dato ("el audio de tus grabaciones, sin cifrar"), el propósito y el plazo. Viene apagada y se puede seguir sin activarla.
@@ -418,10 +418,10 @@ Las referencias de Mobbin están en la sección Referencias. Todas son de iOS y 
 
 Los ejes son independientes: un incidente puede estar cerrado, con 2 fragmentos sin respaldar y con una alerta activa a la vez. La pantalla nunca los resume en un "todo bien".
 
-### Bóveda web (`sos.vigia.app/v/<accessId>#k=…&d=…`)
+### Bóveda web (`<host-bóveda>/v/#a=…&k=…&d=…`)
 | # | Estado | Contenido |
 |---|---|---|
-| W1 | Inactiva (primera vez y sin alertas) | "Eres contacto de confianza de ‹alias›", qué avisos puedes recibir (SOS, aviso automático y, si ‹alias› lo activó, falta de señales), elegir aviso, Probar, guía del país (para prepararse **antes**), "Guarda este enlace en este navegador", "No necesitas cuenta" |
+| W1 | Inactiva (primera vez y sin alertas) | "Eres contacto de confianza de ‹alias›", qué avisos puedes recibir (SOS, aviso automático y, si ‹alias› lo activó, falta de señales), elegir aviso (con iPhone, solo Telegram en F2), Probar, guía del país (para prepararse **antes**), qué queda guardado en este navegador y "Olvidar este enlace", guardar las direcciones cortas de los dos hosts (en iPhone, además, el enlace completo fuera del teléfono), "Clave guardada en 2 de 2 direcciones", "No necesitas cuenta" |
 | W2 | Alerta activa | Encabezado de estado, posiciones con hora y precisión (sin mapa incrustado), cronología, reproductor, transcripción, Ver prueba, Descargar paquete, Extender 7 días, guía del país |
 | W3 | Problemas | **Caducado** ("Este enlace caducó. Pide uno nuevo a quien te lo envió") · **revocado** · **sin clave** ("Abre el enlace original completo") · **la evidencia no coincide** (falla, en rojo: "Este fragmento no coincide con lo que firmó el teléfono") · sin conexión |
 | W4 | Falta de señales | Encabezado con el texto de la decisión 35 ("No recibimos señales del teléfono de ‹alias› desde el lunes a las 14:00"), cronología y guía del país. No muestra incidentes: solo se ven los que tienen SOS (decisión 22) |
@@ -431,7 +431,7 @@ Los ejes son independientes: un incidente puede estar cerrado, con 2 fragmentos 
 | Patrón | Significado |
 |---|---|
 | 1 corta | Grabación iniciada o detenida |
-| 2 cortas | Alerta legal (solo con la IA activada) |
+| 2 cortas | Alerta legal (solo con la IA activada; después de F2) |
 | 2 largas | El temporizador vence en 5 min |
 | 3 largas | El servidor confirmó el SOS |
 
@@ -462,22 +462,22 @@ Todas se confirmaron el 11-oct-2026; las 28 a 38, el 12-oct-2026 (sección sigui
 |---|---|---|
 | 1 | E2EE frente a transcripción en la nube | Manda E2EE. Groq solo como opción en ajustes, apagada por defecto. Con ella, la asistencia por voz en tiempo real pasa a ser opcional. `transcription`, `legal_advice` y la ubicación dejan de ir en claro en D1 |
 | 2 | Plataforma | Android primero. iOS después, con su recorte documentado |
-| 3 | Identidad | Anónima: un par de claves del dispositivo. El servidor solo conoce la clave pública y un ID aleatorio; ni email, ni teléfono, ni IPs en logs. Google pospuesto. Código de recuperación solo en modo avanzado |
+| 3 | Identidad | Anónima: un par de claves del dispositivo. El servidor solo conoce la clave pública y un ID aleatorio; ni email, ni teléfono, ni IPs en logs. Google pospuesto. Código de recuperación solo en modo avanzado (la 48 lo abre como opción en base) |
 | 4 | IA | Opcional. FTS5 y las tarjetas son la verdad. El LLM solo reformula lo recuperado, cita IDs del pack o no contesta, recibe solo texto y, si tarda, se cae al resultado offline |
 | 5 | Bóveda | Solo para contactos registrados de antemano. Enlace secreto con ID de 128 bits y clave en el `#fragmento`. Página estática que descifra en el navegador. Expone lo mínimo. noindex, no-referrer y CSP sin terceros. Caduca 7 días después del último fragmento y el contacto puede ampliarla. Caducar cierra el enlace, no borra la evidencia |
 | 6 | País | Manual, con un chip siempre visible. Pista por MCC, sin GPS, que solo sugiere y nunca cambia sola ni a mitad de un incidente. VE y CO van dentro de la app. En la frontera manda el territorio. Cada incidente fija su `country_code`. En las trochas, la tarjeta es solo de seguridad física |
 | 7 | Fuente y validación | Texto oficial citado por artículo. Un/a abogado/a colegiado/a local firma corpus, tarjetas, contexto del prompt y guía en cada versión. En VE su identidad no va en el pack. Sin firma no hay release |
 | 8 | CountryPack | Solo campos que hoy cambian el comportamiento. Un pack solo puede endurecer los valores por defecto globales |
 | 9 | Persona | Base simple y un "modo riesgo alto" (avanzado) que se activa aparte |
-| 10 | Disparo del SOS | Manual (mantener 3 s y cuenta atrás de 5 s) más un temporizador en el servidor (30 min por defecto) que se arma cuando el servidor se entera de la grabación. Aviso 5 min antes. Extender sin PIN; desarmar con PIN |
+| 10 | Disparo del SOS | Manual (mantener 3 s y cuenta atrás de 5 s) más un temporizador en el servidor (30 min por defecto) que se arma cuando el servidor se entera de la grabación. Aviso 5 min antes. Extender sin PIN; desarmar con PIN (la 50 limita extender sin PIN a 2 veces seguidas) |
 | 11 | Aviso a contactos | Telegram (el servidor guarda solo el `chat_id`) y Web Push. Sin números de teléfono. Mensajes sin contenido y bot con nombre neutro |
 | 12 | Coacción (9ª decisión) | Tres capas: vistazo en alcabala, desbloqueo forzado y forense. Lo que no se promete: ocultar la app ante un forense |
 | 13 | Identidad en el teléfono | Solo se disfraza el icono y el nombre del lanzador. A nivel de sistema la app se llama "Vigía" (riesgo aceptado: cabecera de la notificación, ajustes, indicador del micrófono). Con el camuflaje activado, la calculadora es la pantalla de PIN |
 | 14 | PIN de coacción | Solo en avanzado. Abre el señuelo, dispara el SOS en silencio y detiene la grabación de verdad. No borra nada |
 | 15 | Reproducir en el teléfono | Base: sí, con el PIN. Avanzado: al cerrar el incidente el teléfono queda de solo escritura y se reproduce con el código de recuperación |
-| 16 | Borrado | Candado de R2 de 30 días por objeto. Borrar oculta en el teléfono al instante; en el servidor se ejecuta cuando el fragmento más reciente del incidente cumple 30 días, nunca con un SOS activo. Hasta entonces se puede deshacer con el PIN |
+| 16 | Borrado | Candado de R2 de 30 días por objeto. Borrar oculta en el teléfono al instante; en el servidor se ejecuta cuando el fragmento más reciente del incidente cumple 30 días, nunca con un SOS activo. Hasta entonces se puede deshacer con el PIN (la 61 lo extiende a cualquier alerta activa) |
 | 17 | VE frente a CO | VE: camuflaje activado y se sugiere el modo avanzado. CO: camuflaje apagado pero disponible. Todo lo demás es global |
-| 18 | Censura | Rotación entre 2 y 3 hosts, DNS cifrado con varios resolvedores y sugerencia de VPN. Limitación: sin red no se arma el temporizador |
+| 18 | Censura | Rotación entre 2 y 3 hosts, DNS cifrado con varios resolvedores y sugerencia de VPN. Limitación: sin red no se arma el temporizador (la 44 fija los hosts de F2) |
 | 19 | Alta de contactos | QR en persona por defecto; por mensaje (diáspora), con aviso y sugerencia de borrarlo. La invitación caduca a las 48 h. **Máximo 3 contactos** |
 | 20 | Motor de grabación | AudioRecord + MediaCodec, fragmentos ADTS de 8 s (la 29 lo cambia: entre 2 y 8 s, según la medición de F2), hash, firma y cifrado en RAM. El audio en claro nunca toca el disco |
 | 21 | Pantalla negra | Se quita: bloquear el teléfono ya cumple esa función con el servicio en primer plano |
@@ -503,7 +503,7 @@ Aquí se integra lo que encaja con los innegociables de Vigía. Lo que chocaba c
 | 30 | Ubicación durante el incidente | Cambia el flujo A.6: con la ubicación activada, una posición por minuto mientras graba, cifrada con `K` dentro del registro firmado. Nunca en segundo plano. La bóveda da la hora y la precisión de cada punto, dice los huecos y no inventa trayectos | DEC-03, DEC-16, SES-09, §9.2 |
 | 31 | Aviso por falta de señales | Opcional y apagado. Si el teléfono pasa 12, 24 o 48 h sin ninguna petición firmada, el servidor avisa a los contactos. Latido cada hora, sin ubicación; el servidor guarda solo la hora de la última señal. Se puede pausar hasta una fecha. No salta si quien tiene el teléfono lo deja encendido y con red: para eso está el temporizador (flujo G) | DEC-11, DEC-13, ALT-24 |
 | 32 | Entrega de avisos | Un aviso por incidente o teléfono y por tipo, revalidado antes de disparar. Si nadie lo abre, se repite a los 10 y a los 30 min. Abrir el enlace cuenta como acuse y los demás contactos lo ven, sin nombres. Las novedades llegan a todos. Los fragmentos no mueven el temporizador. Un retraso por fallo nuestro se declara como tal (flujos B y F) | DEC-17, ALT-03, ALT-06, ALT-07, ALT-08, ALT-13, ALT-16, ALT-18 |
-| 33 | Recuperar con código | Avanzado. Del código sale también una clave de firma (Ed25519). Desde otro teléfono se pueden ver los incidentes, decir "Estoy bien", revocar el teléfono perdido y programar o deshacer borrados. Revocar no borra evidencia. En base no existe: el respaldo son los contactos (flujo H) | DEC-18, §11, REC-01 a REC-03 |
+| 33 | Recuperar con código | Avanzado. Del código sale también una clave de firma (Ed25519). Desde otro teléfono se pueden ver los incidentes, decir "Estoy bien", revocar el teléfono perdido y programar o deshacer borrados. Revocar no borra evidencia. En base no existe: el respaldo son los contactos (flujo H). La 48 lo hace opcional también en base | DEC-18, §11, REC-01 a REC-03 |
 | 34 | Exportar paquete | En M8, con el PIN, para dárselo a un/a abogado/a u organización sin necesidad de SOS (flujo I) | DEC-09 adaptado, §12.2 |
 | 35 | Avisos neutrales | Los textos dicen hechos con su hora y remiten a la guía del país. Nunca afirman detención, desaparición ni la causa (ver Voz y textos) | §10.2, §10.3, DEC-19 |
 | 36 | Preparación honesta | Cada permiso negado dice qué protección pierdes; Inicio no da todo por listo si falta algo crítico; aviso de poco espacio con los minutos que quedan; nunca se borra evidencia sin respaldar para hacer sitio | §5.2, CAP-15, CAP-17 |
@@ -572,6 +572,37 @@ Aquí se integra lo que encaja con los innegociables de Vigía. Lo que chocaba c
 - Recuperar lo que nunca salió del teléfono.
 - Ocultar la app ante un análisis forense (decisión 12).
 
+## Decisiones de F1 (12-oct-2026)
+
+Al aprobar el plan de F2 (`docs/plan/2026-10-12-plan-maestro-f2.md`) se fijaron estas decisiones. Vienen de dos revisiones de seguridad y de tres revisiones adversariales del plan. Si una decisión anterior choca con una de esta tabla, manda la de esta tabla.
+
+| # | Tema | Decisión |
+|---|---|---|
+| 39 | Formatos y firmas | Cadena canónica de las peticiones (prefijo de versión, método, ruta sin query, hora, idPeticion, idDispositivo y SHA-256 del cuerpo crudo), firma P1363 y hora dentro de ±5 min; si el reloj está desfasado, se corrige con la hora del servidor sin tocar `hora_teléfono`. Bytes canónicos de `r`, con un registro de apertura firmado (que lleva el `country_code`) como origen de la cadena. Prefijos de dominio distintos para peticiones, registros, cierre, acuses y recuperación. AAD con codificación fija `"vigia/v1"‖tipo‖incidente‖seq`, también para metadatos. `info` de HPKE ligado al incidente y al rol. Acuse `{prefijo, kid, SHA-256(r), hora_servidor}`, que la app y la bóveda verifican con las claves públicas fijadas antes de borrar o contar nada. "Respaldado hasta" es el último fragmento del tramo contiguo con acuse válido. Las órdenes son idempotentes por estado (por ejemplo, "extender" lleva el plazo que vio la app). Solo cuenta como señal una petición con firma de petición de un teléfono no revocado |
+| 40 | Ingesta | La clave de R2 la construye el servidor tras comprobar el dueño del incidente; escritura única; acuse solo cuando R2 y D1 confirman. Acepta fragmentos fuera de orden: comprueba `prev` si el anterior ya está y, si no encadena, lo marca como bifurcación sin borrar nada. Con el cierre guardado, un `seq` mayor se rechaza. Un PUT repetido no cambia la hora de recepción ni las marcas. El límite por dispositivo cuenta después de verificar la firma, con cupos separados para órdenes, subida y lecturas. "Fragmento más reciente" se mide por la hora de recepción. Un fragmento que llega tarde no es "posterior a la alerta" si su hash ya lo fijaban antes el `prev` del siguiente o el cierre. La conciliación D1/R2 la hace un script externo de solo lectura: el Worker nunca lista |
+| 41 | Cron y D1 | En lugar de "volver a leer en la misma transacción" (D1 no tiene transacciones interactivas): transiciones condicionales en batch, restricciones únicas y una tabla de entregas (pendiente, enviado, fallido) con reintentos. La cancelación solo llega a quien recibió la alerta. Sin réplicas de lectura para el temporizador ni la autorización. Consultas con índice |
+| 42 | Lecturas firmadas y SOS sin grabación | El teléfono lee lo ya respaldado del servidor (M8, "Abrir con código" y "Exportar paquete") con lecturas firmadas: la copia local se sigue borrando con el acuse, y lo respaldado se escucha con red. Hay lecturas firmadas de contactos (estado, canal y último acceso) y del estado del aviso y el registro de accesos. El SOS sin grabación crea la apertura de un incidente sin audio, que no arma el temporizador, se cierra al cancelar con el PIN y continúa si se graba con la alerta activa. "Abierta" cuenta solo con un POST explícito tras descifrar |
+| 43 | Bóveda | Enlace `/v/#a=<accessId>&k=<privada>&d=<huella>`: el `accessId` también va en el fragmento y las rutas de la API son constantes. Prueba de posesión `HKDF-SHA256(k, sal fija, "vigia/v1/acceso"‖accessId)` en una cabecera; el servidor guarda solo su SHA-256 y nunca la pública del contacto; el alias va firmado por el dispositivo. Sin prueba válida, el mismo 404 sin registro. Cabeceras en todas las respuestas. Un único service worker en `/sw/`. Durante el alta, el contacto abre los enlaces de los dos hosts y cada origen guarda su copia de la clave ("Clave guardada en 2 de 2 direcciones"). Vuelta a la bóveda por las direcciones cortas de los dos hosts, sin secretos; en WebKit, además, el enlace completo fuera del teléfono. "Olvidar este enlace" recorre los dos orígenes. Un navegador puede ser contacto de varias personas: una entrada por `accessId` y una suscripción push compartida. "Copiar" es la acción principal de las posiciones; "Abrir en mapas" avisa antes |
+| 44 | Hosts | Cambia la 18 para F2: solo hosts gratuitos y neutros, sin "vigia" ni "sos". `<host-api>` y `<host-bóveda>` son dos Workers en el subdominio neutro de workers.dev de una cuenta dedicada; `<host-respaldo>` es el mismo código en pages.dev, para que un bloqueo de todo workers.dev no deje sin respaldo. Los nombres reales viven fuera del repo. Sin dominios propios en F2 |
+| 45 | Página de presentación | Superficie nueva: `vigiaapp.pages.dev`, con el nombre, porque es lo que se promociona. Estática, sin terceros ni analítica, publicada desde `sitio/` en `main`. Nunca enlaza ni nombra un host operativo. Mientras sea prototipo avisa "Prototipo en construcción. Todavía no lo uses para protegerte." y no ofrece descarga. El camuflaje de la app sigue siendo un ajuste |
+| 46 | Telegram y Web Push | `secret_token` en el webhook; código de vinculación de un solo uso; el bot nunca envía el enlace ni el host, descarta el nombre de quien escribe y borra sus avisos tras la apertura; lista de servicios push permitidos; sub de VAPID neutro; push sin carga o solo con el tipo cifrado; un canal por contacto. Los contactos con iPhone usan solo Telegram en F2 |
+| 47 | Coacción con el PIN real | Con una alerta activa, el servidor rechaza las órdenes del teléfono que reducen la protección: revocar contactos, cambiar canales, apagar o pausar la falta de señales, programar borrados y crear o cambiar la clave de recuperación. La recuperación sí puede, si su clave ya tenía poderes cuando empezó la alerta |
+| 48 | Código de recuperación | Detalla y amplía la 33. Crockford Base32 de 24 símbolos (120 bits), normalización (mayúsculas, espacios, O por 0, I y L por 1) y HKDF-SHA256 con sal e info fijas. También opcional en modo base, desde M10; al activarlo, el teléfono envuelve las `K` que conserva. Salvaguardas: una clave creada después de la configuración inicial no tiene poderes durante 72 h y M1 lo muestra; cambiar la pública exige la firma de la vigente |
+| 49 | Teléfono revocado | Detalla el flujo H.3. Sus órdenes, lecturas y aperturas nuevas reciben la misma respuesta que una firma inválida, y sus peticiones nunca cuentan como señal. Solo se aceptan fragmentos y cierre de incidentes cuya apertura tuvo acuse antes de la revocación, marcados "recibido después de la revocación" |
+| 50 | Extender sin PIN | Cambia la 10: como mucho 2 extensiones seguidas sin PIN; la tercera pide el PIN, y el PIN de coacción finge extender y dispara el SOS en silencio. Sin red, la extensión se muestra pendiente y el recordatorio local usa el plazo confirmado |
+| 51 | PIN | Verificador HMAC con una clave del Keystore, contador persistente y esperas con reloj monotónico que sobreviven al reinicio. Los dos PIN cuestan lo mismo de comprobar, y en modo base hay un verificador de relleno. En la calculadora la espera se aplica sin mostrar nada |
+| 52 | Android endurecido | Sin copias de seguridad; solo el lanzador exportado; sin enlaces profundos ni WebView; sin OTA ni dev client en release; sin logs propios en release; red sin texto plano y solo con CAs del sistema; lista cerrada de permisos sin ubicación en segundo plano; campos de texto sin aprendizaje del teclado ni autocompletado; portapapeles sensible; protección contra toques tapados; notificaciones en canales neutros con visibilidad secreta. Notificaciones locales y ubicación con APIs de Android desde Kotlin, porque expo-notifications y expo-location arrastran Firebase o Google Play Services; la compilación falla si entra una dependencia prohibida |
+| 53 | Cola de subida | Pasa de TypeScript a Kotlin, dentro del servicio: una sola cola para todo lo firmado, con prioridad fija (apertura; SOS y cancelación; desarme y extensión; cierre; latido; fragmentos). Tras Detener, el servicio sigue hasta vaciarla, y WorkManager cubre las muertes del servicio y los reinicios. JS solo lee el estado. Motivo: el hilo JS puede pausarse con la pantalla apagada y la evidencia no saldría a tiempo |
+| 54 | Ajustes | Sale el ajuste "datos móviles" en F2: apagarlo podría impedir que la evidencia salga a tiempo |
+| 55 | Plataforma Cloudflare | Cuenta dedicada a Vigía, con 2FA por llave y un token de API mínimo con caducidad; `observability` y trazas desactivadas; sin Logpush ni analítica; `preview_urls` desactivadas; tope global de altas por hora sin IP, con su cota calculada; Workers Paid antes del piloto |
+| 56 | Lo que guarda el servidor | La hora de la última señal solo con el aviso por falta de señales activo, borrada al apagarlo, y la fecha de fin de la pausa (el plazo cuenta desde ella). Las filas anti-reenvío se borran a los 10 min |
+| 57 | Retención | Ningún borrado automático de incidentes de teléfonos inactivos en la v1 ni en el piloto. Se revisa con los datos del piloto y con un custodio legal antes del lanzamiento público |
+| 58 | Variantes de prueba | Las builds de debug y de pruebas envuelven `K` también para una clave de escucha de pruebas (fuera del repo, destruida al cerrar F2) y admiten un interruptor sin `FLAG_SECURE` para las capturas; la de pruebas compila con packs en borrador y muestra la banda. Solo van a teléfonos de prueba, con grabaciones sin terceros, y nunca sirven para protegerse. La de release no lleva nada de eso; "Quién ve qué", la envoltura y el Do de `FLAG_SECURE` describen la de release |
+| 59 | Lo opcional | La IA, la transcripción, M5, la alerta legal con 2 vibraciones cortas y el temporizador de trayecto quedan fuera de F2 |
+| 60 | Escucha en modo base | Las lecturas firmadas usan una clave de lectura con `setUnlockedDeviceRequired`, distinta de la de firma. La envoltura local de `K` es para una pública cuya privada solo se abre con el PIN: grabar no pide el PIN; escuchar, sí, también ante un análisis del teléfono |
+| 61 | Borrado | Detalla la 16. Estados programado, borrando y borrado; durante el borrado, la ingesta de ese incidente responde 409. Nunca se ejecuta con una alerta activa del incidente o del teléfono, tampoco la falta de señales |
+| 62 | Distribución | La clave de firma de release se custodia fuera del repo y de EAS, con copias cifradas, antes del primer APK que salga de los teléfonos de prueba |
+
 ## Modelo de amenaza por país
 
 > El perfil de amenaza manda sobre todo. Un fallo pone en riesgo físico y legal a una persona real.
@@ -618,18 +649,21 @@ vigia-app/  (monorepo pnpm)
 ├─ packages/shared   TS puro: contratos de API, formato de sobre y cadena, verificador,
 │                    tipo CountryPack y su validador. Lo usan app, Worker y bóveda.
 ├─ packages/packs    ve/, co/: datos JSON más el registro de validación; script de export legible.
-├─ packages/mobile   Expo (dev build) más 1 módulo nativo Kotlin "recorder".
-└─ packages/backend  1 Worker Hono, dos hosts:
-                     api.vigia.app  → ingesta, temporizador, contactos, avisos, STT/IA opcionales
-                     sos.vigia.app  → página estática y blobs cifrados
-                     D1 · R2 (candado 30 d) · Cron cada minuto · webhook de Telegram
+├─ packages/mobile   Expo (build con el JS dentro) más 1 módulo nativo Kotlin "recorder".
+├─ packages/boveda   página estática de la bóveda.
+├─ packages/backend  Worker Hono, desplegado con nombres neutros (decisión 44):
+│                    <host-api>      → ingesta, temporizador, contactos, avisos
+│                    <host-bóveda>   → página de la bóveda y sus datos cifrados
+│                    <host-respaldo> → el mismo código en pages.dev
+│                    D1 · R2 (candado 30 d) · Cron cada minuto (solo en <host-api>) · webhook de Telegram
+└─ sitio/            página de presentación (vigiaapp.pages.dev, decisión 45).
 ```
 
 **Unidades del móvil** (una responsabilidad cada una):
 | Unidad | Hace | No hace |
 |---|---|---|
 | `recorder` (Kotlin) | Servicio en primer plano de micrófono (y de ubicación, si está activada). Por cada fragmento, un sobre: AAC → hash → AES-256-GCM → registro firmado, con la posición nueva cifrada si la hay → disco (solo cifrado) | Red |
-| `SyncQueue` | Sube primero la apertura del incidente, que es lo que arma el temporizador, y luego los sobres (FIFO, backoff exponencial con jitter de 1 s a 5 min, rotación de hosts). Borra la copia local **solo** con el acuse firmado | Cifrar |
+| Cola de subida (Kotlin, dentro del `recorder`; decisión 53) | Una sola cola para todo lo firmado, con prioridad fija: apertura (lo que arma el temporizador); SOS y cancelación; desarme y extensión; cierre; latido; fragmentos. Backoff exponencial con jitter de 1 s a 5 min y rotación de hosts. Borra la copia local **solo** con un acuse válido, verificado con la clave fijada. JS solo lee su estado | Cifrar |
 | `LegalEngine` | FTS5 sobre el pack activo → tarjetas | Llamar a la IA |
 | `PackLoader` | Valida el pack del binario y reconstruye `legal.db` si cambia la versión | Descargar packs |
 | `TimerClient` | Arma, extiende y desarma; recordatorios locales; latido cada hora si está activado el aviso por falta de señales | Disparar el SOS (lo hace el servidor) |
@@ -640,12 +674,12 @@ vigia-app/  (monorepo pnpm)
 
 **Bases locales:**
 - `legal.db`, en claro: es ley pública.
-- `vault.db`, con **SQLCipher** y clave en el Keystore: cola de sobres, incidentes, etiquetas de contactos. Si alguien extrae la memoria del teléfono en un laboratorio, no puede leerla sin el Keystore de ese teléfono.
+- `vault.db`, con **SQLCipher** y clave en el Keystore: incidentes, etiquetas de contactos y, si el pico lo confirma, la cola de sobres (si no, archivos cifrados con una clave del Keystore). Si alguien extrae la memoria del teléfono en un laboratorio, no puede leerla sin el Keystore de ese teléfono.
 
 **Formato de audio:** AAC-LC mono a 16 kHz, unos 32 kbps (unos 14 MB por hora). Se valida en el pico técnico de F2, igual que la duración del fragmento (decisión 29).
 
 **Superficie de la API** (borrador para F1):
-- **Firma de las peticiones del dispositivo:** firma ECDSA sobre método, ruta, hora y hash del cuerpo. La hora debe estar dentro de una ventana de ±5 min.
+- **Firma de las peticiones del dispositivo:** firma ECDSA (P1363) sobre una cadena canónica: prefijo de versión, método, ruta sin query, hora, idPeticion, idDispositivo y hash del cuerpo. La hora debe estar dentro de una ventana de ±5 min (decisión 39).
 - **Peticiones del dispositivo:**
   - `POST /v1/devices` (registro de la clave pública)
   - `POST /v1/incidents` (país, claves envueltas, metadatos cifrados)
@@ -654,22 +688,25 @@ vigia-app/  (monorepo pnpm)
   - `POST …/timer` (armar, extender, desarmar)
   - `POST …/sos` (disparar o cancelar)
   - `POST|DELETE …/deletion` (programar o deshacer)
-  - `POST /v1/contacts` y `DELETE /v1/contacts/:id`
+  - `GET /v1/incidents/:id/chunks/:seq` (lectura firmada con la clave de lectura; decisiones 42 y 60)
+  - `GET /v1/incidents/:id/status` (estado del aviso y registro de accesos)
+  - `POST /v1/contacts`, `GET /v1/contacts` (estado, canal y último acceso) y `DELETE /v1/contacts/:id`
   - `POST /v1/contacts/:id/test`
   - `PUT /v1/devices/me/silence` (activar, pausar o apagar el aviso por falta de señales)
   - `POST /v1/devices/me/heartbeat` (latido; cualquier otra petición firmada también cuenta como señal)
   - `POST /v1/stt` y `POST /v1/advise` (opcionales)
-- **Bóveda** (acceso por `accessId` con límite de peticiones):
-  - `GET /v1/vault/:accessId` (incidentes visibles y la clave envuelta para ese contacto; queda en el registro de accesos)
-  - `GET /v1/vault/:accessId/chunks/:incident/:seq`
-  - `POST /v1/vault/:accessId/subscribe`
-  - `POST /v1/vault/:accessId/extend`
-- **Recuperación** (firmada con la clave Ed25519 del código): `GET /v1/recovery/incidents`, `POST /v1/recovery/ok` ("Estoy bien"), `POST /v1/recovery/revoke` (revocar el teléfono) y `POST|DELETE /v1/recovery/deletion`.
+- **Bóveda** (rutas constantes; el `accessId` y la prueba de posesión van en cabeceras, con límite de peticiones por `accessId`; decisión 43):
+  - `GET /v1/vault` (incidentes visibles y la clave envuelta para ese contacto; queda en el registro de accesos)
+  - `GET /v1/vault/chunks/:incident/:seq`
+  - `POST /v1/vault/open` (apertura explícita tras descifrar: es el acuse del aviso)
+  - `POST /v1/vault/subscribe`
+  - `POST /v1/vault/extend`
+- **Recuperación** (firmada con la clave Ed25519 del código): `GET /v1/recovery/incidents`, `GET /v1/recovery/incidents/:id/chunks/:seq`, `POST /v1/recovery/ok` ("Estoy bien"), `POST /v1/recovery/revoke` (revocar el teléfono) y `POST|DELETE /v1/recovery/deletion`.
 - **Límites por dispositivo:** cuota de almacenamiento, pruebas de alerta por día y peticiones por minuto, para que nadie llene R2 ni use el bot para molestar a terceros.
 - **Telegram:** `POST /tg/<ruta-secreta>`.
-- **Cron (cada minuto):** dispara los temporizadores vencidos y los avisos por falta de señales, repite los avisos que nadie abrió (a los 10 y a los 30 min) y ejecuta los borrados que tocan. Antes de disparar vuelve a leer el estado en la misma transacción, y una restricción única impide dos avisos del mismo tipo para el mismo incidente o teléfono.
+- **Cron (cada minuto):** dispara los temporizadores vencidos y los avisos por falta de señales, repite los avisos que nadie abrió (a los 10 y a los 30 min) y ejecuta los borrados que tocan. Usa transiciones condicionales en batch y una tabla de entregas con reintentos, y una restricción única impide dos avisos del mismo tipo para el mismo incidente o teléfono (decisión 41).
 
-**D1** (borrador): `devices` (con la hora de la última señal, el umbral del aviso, la revocación y la clave pública de recuperación), `contacts`, `incidents`, `chunks`, `wrapped_keys`, `blobs` (metadatos y transcripciones cifradas), `alerts` (tipo, creación, envío por canal y primera apertura) y `vault_access_log`. Ver la sección Seguridad para saber qué guarda y qué no.
+**D1** (borrador): `devices` (con la hora de la última señal, el umbral del aviso, la revocación y la clave pública de recuperación), `contacts`, `incidents`, `chunks`, `wrapped_keys`, `blobs` (metadatos y transcripciones cifradas), `alerts` (tipo, creación, envío por canal y primera apertura), `deliveries` (entregas con reintentos), la tabla anti-reenvío (filas de 10 min) y `vault_access_log`. Ver la sección Seguridad para saber qué guarda y qué no.
 
 **Ollama:** túnel privado; el Worker es el único cliente, autenticado con un token de servicio. Nada queda expuesto en público.
 
@@ -681,27 +718,29 @@ vigia-app/  (monorepo pnpm)
 | Incidente `K` (AES-256) | Memoria nativa | Cifrar fragmentos, metadatos y transcripciones |
 | Contacto (X25519) | Privada solo en su QR o enlace; el teléfono guarda la pública | Que ese contacto descifre `K` |
 | Recuperación (X25519 y Ed25519, avanzado) | Derivadas en software del código de 24 caracteres con HKDF-SHA256; el teléfono guarda la pública X25519 y el servidor, la pública Ed25519 | X25519: acceso de la persona dueña con el teléfono de solo escritura. Ed25519: firmar desde otro teléfono "Estoy bien", revocar el teléfono perdido y programar o deshacer borrados |
-| Local (AES, Keystore, base) | Keystore | Envolver `K` en el teléfono para poder reproducir |
-| Servidor (ECDSA P-256) | Secreto del Worker | Firmar los acuses (sello de tiempo) |
+| Lectura (ECDSA P-256) | Keystore, con `setUnlockedDeviceRequired` | Firmar las lecturas de lo ya respaldado (decisión 60) |
+| Local (X25519, base) | Privada cifrada con una clave que sale de HMAC_Keystore(PIN) | Envolver `K` en el teléfono para poder reproducir: grabar no pide el PIN; escuchar, sí (decisión 60) |
+| Servidor (ECDSA P-256, con `kid`) | Secreto del Worker | Firmar los acuses (sello de tiempo); sus públicas van fijadas en la app y en la bóveda |
 
 - **Envoltura:** `K` se envuelve con **HPKE** (RFC 9180: DHKEM-X25519, HKDF-SHA256, AES-256-GCM) para cada contacto y, en modo avanzado, para la clave de recuperación. El servidor no puede fabricar una envoltura válida porque no conoce las claves públicas de los contactos.
 - **Sobre de cada fragmento (todo en RAM):**
   ```
   p   = SHA-256(audio)
-  ct  = AES-256-GCM(K, nonce aleatorio de 96 bits, aad = incidente‖seq)
-  loc = AES-256-GCM(K, otro nonce, aad = incidente‖seq‖"loc", {lat, lon, precisión_m, hora_fix})
+  ct  = AES-256-GCM(K, nonce aleatorio de 96 bits, aad = "vigia/v1"‖"ct"‖incidente‖seq)
+  loc = AES-256-GCM(K, otro nonce, aad = "vigia/v1"‖"loc"‖incidente‖seq, {lat, lon, precisión_m, hora_fix})
   r   = {v, incidente, seq, hora_teléfono, p, c = SHA-256(ct), loc, prev = SHA-256(r_anterior)}
-  s   = firma_dispositivo(r)
+  s   = firma_dispositivo(prefijo de registro ‖ bytes canónicos de r)
   → al disco solo va ct + r + s
   ```
+  La cadena empieza en un registro de apertura firmado que lleva el `country_code` del incidente (decisión 39).
   `loc` solo va si la ubicación está activada y hay una posición nueva desde el fragmento anterior; si no, se omite y la bóveda muestra el hueco.
 - **Servidor:**
-  1. Comprueba `s`, que `prev` encadene y que `c` coincida.
-  2. Guarda `ct` en R2 (`incidents/<id>/<seq>`) y `r+s` en D1.
-  3. Responde con un **acuse firmado** `{SHA-256(r), hora_servidor}`. Ese acuse es el sello de tiempo verificable.
-  4. Lo que llega después del SOS se marca **"posterior a la alerta"**: quien tiene el teléfono confiscado también puede firmar.
-- **Cierre:** un registro final firmado `{último seq, hash final}`. Hasta su acuse, el teléfono muestra "cierre pendiente de confirmar". Si falta, la bóveda dice "el teléfono dejó de enviar a las HH:MM".
-- **Enlace del contacto:** `#k=<privada>&d=<huella del dispositivo>`. La huella fija la identidad del teléfono, así que un servidor comprometido no puede colar evidencia ajena.
+  1. Comprueba `s`, que `c` coincida y, si el anterior ya está, que `prev` encadene; acepta fragmentos fuera de orden y marca las bifurcaciones (decisión 40).
+  2. Guarda `ct` en R2, con una clave que construye el propio servidor tras comprobar el dueño del incidente, y `r+s` en D1. Escritura única.
+  3. Responde con un **acuse firmado** `{prefijo, kid, SHA-256(r), hora_servidor}` cuando R2 y D1 confirman. Ese acuse es el sello de tiempo verificable, y el teléfono lo verifica antes de borrar su copia.
+  4. Lo que llega después del SOS se marca **"posterior a la alerta"**: quien tiene el teléfono confiscado también puede firmar. No se marca si su hash ya lo fijaban antes de la alerta el `prev` del siguiente o el cierre.
+- **Cierre:** un registro final firmado `{último seq, hash final}`; después, un `seq` mayor se rechaza. Hasta su acuse, el teléfono muestra "cierre pendiente de confirmar". Si falta, la bóveda dice "el teléfono dejó de enviar a las HH:MM".
+- **Enlace del contacto:** `#a=<accessId>&k=<privada>&d=<huella del dispositivo>`. La huella fija la identidad del teléfono, así que un servidor comprometido no puede colar evidencia ajena.
 - **Verificación en la bóveda** (código de `shared`): firmas, cadena, `c`, y `p` después de descifrar. Muestra "✓ N fragmentos, cadena íntegra, firmados por el dispositivo, recibidos entre HH:MM y HH:MM".
 - **Especificación pública de verificación** y verificador abierto, para que un tribunal pueda entender el sistema.
 
@@ -710,7 +749,7 @@ vigia-app/  (monorepo pnpm)
 **A. Grabar.**
 1. Toque en Grabar (en VE, antes PIN + "=").
 2. Arranca el servicio de micrófono, con notificación neutra y 1 vibración corta.
-3. Lo primero que sale cuando hay red es la apertura del incidente, que es lo que arma el temporizador. Después, cada fragmento se guarda como sobre en `vault.db` y la SyncQueue lo sube.
+3. Lo primero que sale cuando hay red es la apertura del incidente, que es lo que arma el temporizador. Después, cada fragmento se guarda como sobre cifrado y la cola de subida (Kotlin) lo sube.
 4. Detener pide el PIN y desarma el temporizador. Sin red, el cierre queda "pendiente de confirmar" y lo que falte se sigue subiendo.
 5. Si la app muere, se pierde el fragmento en curso y el incidente queda "interrumpido a las HH:MM". Si te quitan o destruyen el teléfono, se pierde además todo lo que no se subió: por eso M2 dice "Respaldado hasta HH:MM:SS".
 6. La ubicación (si se activó) se pide cada minuto mientras graba, solo con el permiso "mientras se usa". Cada fragmento lleva la posición nueva, si la hay; sin posición no se inventa ninguna.
@@ -719,7 +758,7 @@ vigia-app/  (monorepo pnpm)
 1. Se arma cuando el servidor se entera de la grabación; el reloj cuenta desde ese momento.
 2. Recordatorio 5 min antes, con 2 vibraciones largas.
 3. Extender (+30 min) es un toque sin PIN. "Estoy bien" pide el PIN; con el PIN de coacción finge desarmar.
-4. En modo avanzado también hay temporizador de trayecto.
+4. En modo avanzado también habrá temporizador de trayecto (después de F2; aún sin diseño).
 5. Al vencer, el cron dispara el SOS.
 6. Que sigan llegando fragmentos no extiende ni desarma nada: el teléfono puede tenerlo otra persona. Solo cuentan las órdenes firmadas de extender o desarmar.
 7. Si el servidor se entera de un incidente que ya se cerró y desarmó con el PIN (todo ocurrió sin red), no arma nada y lo registra como "conocido después de terminar".
@@ -730,26 +769,27 @@ vigia-app/  (monorepo pnpm)
 2. Cancelar pide el PIN real, y los contactos reciben "la alerta se canceló".
 3. Con el PIN de coacción, el teléfono muestra "cancelada" pero el SOS sigue.
 4. Las claves se envuelven desde el inicio, pero **el servidor solo muestra el incidente a los contactos si hay SOS**.
+5. Sin grabación, el SOS crea un incidente sin audio que no arma el temporizador. Grabar con esa alerta activa continúa el mismo incidente, y el SOS sale el primero de la cola (decisiones 42 y 53).
 
 **D. Alta de contacto** (requiere red; máximo 3).
 1. Se generan el par de claves y el `accessId`. El servidor registra el hash con caducidad de 48 h y se muestra el QR.
-2. El contacto escanea → W1 → elige Telegram o Web Push → su navegador guarda la clave en IndexedDB → Probar alerta.
+2. El contacto escanea → W1 → elige Telegram o Web Push → su navegador guarda la clave en IndexedDB → abre también el enlace del segundo host, que guarda su propia copia → Probar alerta (decisión 43).
 3. El teléfono muestra "✓ listo" y olvida la clave privada.
-4. Revocar invalida el enlace, y los incidentes nuevos ya no se envuelven para ese contacto.
+4. Revocar invalida el enlace, borra su canal y da de baja su suscripción; los incidentes nuevos ya no se envuelven para ese contacto.
 
 **E. Sincronización y censura.**
-1. Ante errores de red, rotación entre hosts: dominio propio → `*.workers.dev` → segundo dominio, con DNS cifrado de varios resolvedores.
+1. Ante errores de red, rotación entre hosts: `<host-api>` (workers.dev) → `<host-respaldo>` (pages.dev) → un segundo nombre de respaldo, con DNS cifrado de varios resolvedores (decisión 44).
 2. Si todos fallan durante un rato: "No podemos llegar al servidor. Tu evidencia está segura en el teléfono. Si tu red bloquea sitios, prueba una herramienta anticensura."
 
 **F. Entrega de avisos** (cualquier tipo; decisión 32).
 1. Un aviso por incidente (o por teléfono) y por tipo. Va a todos los contactos a la vez, sin contenido.
 2. Si nadie lo abre en 10 min, se repite; y otra vez a los 30 min. Después, la cronología dice "Nadie lo abrió todavía".
-3. Abrir el enlace cuenta como acuse. Los demás contactos ven "Otro contacto lo abrió a las 14:12", sin nombres. Que lo abran no significa que la persona esté bien.
+3. Descifrar en la bóveda cuenta como acuse (un POST explícito; pedir la página no cuenta). Los demás contactos ven "Otro contacto lo abrió a las 14:12", sin nombres. Que lo abran no significa que la persona esté bien.
 4. Las novedades (cancelada, señal recuperada, "Estoy bien" desde otro teléfono) van a la cronología y a todos los contactos como "Hay novedades", como mucho una vez cada 10 min.
 
 **G. Aviso por falta de señales** (opcional y apagado; decisión 31).
 1. Se activa en M10 con un umbral de 12, 24 o 48 h. La activación vale cuando el servidor la confirma.
-2. El teléfono manda un latido cada hora (WorkManager; Android puede retrasarlo) y cualquier petición firmada cuenta como señal. El servidor guarda solo la hora de la última, sin historial ni ubicación.
+2. El teléfono manda un latido cada hora (WorkManager; Android puede retrasarlo) y cualquier petición con firma de petición de un teléfono no revocado cuenta como señal. El servidor guarda solo la hora de la última, sin historial ni ubicación.
 3. Si el aviso está activo y el teléfono no consigue red, un recordatorio local 2 h antes del umbral dice que tus contactos recibirán el aviso.
 4. Al vencer, el cron avisa a los contactos (W4); esa vista caduca a los 7 días, ampliables, como el resto. Cuando vuelve una señal reciben "volvió a dar señales", que no confirma que la persona esté bien.
 5. "Pausar hasta" una fecha sirve para viajes sin red. Mientras el servidor no la confirma, la pantalla dice "Pausa pendiente: si no llega al servidor, el aviso sigue activo".
@@ -758,7 +798,7 @@ vigia-app/  (monorepo pnpm)
 **H. Recuperar con código** (avanzado; decisión 33).
 1. En otro teléfono, "Tengo un código de recuperación" → se escriben los 24 caracteres → se derivan las claves X25519 y Ed25519.
 2. Se pueden ver los incidentes, decir "Estoy bien" (cancela una alerta activa; los contactos lo ven como "con su código, desde otro teléfono"), revocar el teléfono perdido y programar o deshacer borrados.
-3. Revocar no borra evidencia: el servidor rechaza todo lo que firme ese teléfono desde entonces y cancela los borrados pendientes que programó.
+3. Revocar no borra evidencia: el servidor rechaza las órdenes, lecturas y aperturas nuevas de ese teléfono, sus peticiones dejan de contar como señal y cancela los borrados pendientes que programó. Solo acepta fragmentos y cierre de incidentes ya abiertos, marcados "recibido después de la revocación" (decisión 49).
 4. Quien tenga el código puede hacer lo mismo. Por eso se guarda lejos del teléfono.
 5. Para grabar en el teléfono nuevo se hace la configuración normal y se vuelve a dar de alta a los contactos.
 
@@ -867,6 +907,8 @@ Perfil que se busca en cada país: un/a abogado/a colegiado/a con práctica pena
 | **Audio en claro** | **Groq (EE. UU.)**, a través del Worker, sin guardarse | **Solo con la transcripción activada** | **Sí: un tercero** |
 | Texto y artículos | Ollama propio, por túnel privado | Solo con la IA activada | Sí, en servidor propio |
 | IP | Red de Cloudflare | Cada conexión | No se guarda en nuestros logs |
+| Nombre del servidor al que te conectas (SNI) | Tu operadora | Cada conexión | Sí: por eso los hosts tienen nombres neutros (decisión 44) |
+| Avisos push de tus contactos | Google, Apple o Mozilla (según su navegador) | Cuando hay un aviso | Sin contenido |
 | Paquete exportado (audio, registros, firmas y acuses) | Quien tú elijas | Solo si lo exportas | Sí: lo decides tú |
 | Nada | Google / Firebase | Nunca | - |
 
@@ -894,25 +936,26 @@ Perfil que se busca en cada país: un/a abogado/a colegiado/a con práctica pena
 7. **Especificación pública de verificación y verificador abierto** (en el caso de RDC de 2018, las partes pueden exigir que se explique cómo funciona la tecnología).
 8. **DNS cifrado con varios resolvedores** (en VE están bloqueados los DNS públicos de Google y de Cloudflare).
 
-**Cabeceras de la bóveda:**
-- `Content-Security-Policy` estricta: solo `self`, sin `unsafe-inline` ni `eval`, `frame-ancestors 'none'`.
-- `Referrer-Policy: no-referrer` y `X-Robots-Tag: noindex`.
+**Cabeceras de la bóveda** (en todas sus respuestas):
+- `Content-Security-Policy` estricta: solo `self`, sin `unsafe-inline` ni `eval`, `frame-ancestors 'none'`, con Trusted Types.
+- `Referrer-Policy: no-referrer`, `X-Robots-Tag: noindex`, `nosniff`, COOP, CORP, Permissions-Policy y `no-store`.
+- Los blobs y el JSON llevan su tipo exacto y CSP `default-src 'none'; sandbox`.
 - Sin cookies y sin scripts de terceros.
 
 ## Pruebas y criterios de aceptación
 
-**Lógica crítica con TDD** (Vitest):
-- sobre, cadena y verificador (un único código, compartido entre app, Worker y bóveda);
+**Lógica crítica con TDD** (Vitest y JUnit):
+- sobre, cadena y verificador (un único formato con vectores compartidos; si la app verifica en Kotlin, lo decide el pico);
 - interoperabilidad HPKE entre Kotlin y JS con vectores de prueba;
 - validador de packs, con las mismas pruebas para VE y CO;
 - LegalEngine con casos de prueba por pack;
-- SyncQueue con reloj falso (backoff y rotación de hosts);
+- cola de subida (Kotlin) con reloj virtual (prioridad, backoff y rotación de hosts);
 - cron del temporizador (D1 local);
 - borrado diferido y candado de R2.
 
 **Kotlin:**
 - pruebas unitarias del corte ADTS: los fragmentos unidos tienen que dar el audio exacto;
-- pruebas en **teléfonos reales de gama baja de al menos 3 fabricantes con ahorro de batería agresivo**: 30 min con la pantalla apagada, modo de reposo (Doze), llamada entrante, ubicación cada minuto y fragmentos de 2, 4 y 8 s.
+- pruebas en **teléfonos reales de gama baja de al menos 3 fabricantes con ahorro de batería agresivo**: 30 min con la pantalla apagada, modo de reposo (Doze), llamada entrante, ubicación cada minuto y las duraciones de fragmento que fije el pico.
 
 **E2E de la app (Maestro):** configuración inicial, grabar, SOS, coacción y señuelo, borrar y deshacer, cambio de país, exportar paquete, recuperar con código y revocar, y aviso por falta de señales.
 
@@ -969,13 +1012,27 @@ Se mide con contadores agregados en el Worker, sin ID de dispositivo, y con prue
 - **Que Web Push llegue en VE no está verificado:** prueba de campo en F2. Telegram es el canal de respaldo.
 - **Sostenibilidad:** Panic Button se retiró por falta de fondos y de soporte. Hace falta un plan de mantenimiento. Se planteó cobrar por uso; queda fijado que grabar, derechos, SOS, avisos y bóveda nunca se cobran (choque C7).
 - **Riesgo aceptado (decisión 13):** el nombre "Vigía" se ve en ajustes, en la cabecera de la notificación y en el indicador del micrófono.
-- **Distribución:** Play Store (declarar el servicio en primer plano de micrófono) y APK firmado. Hay que publicar la huella del certificado para que se detecten APK falsos.
+- **Distribución:** Play Store (declarar el servicio en primer plano de micrófono) y APK firmado. Hay que publicar la huella del certificado para que se detecten APK falsos, y custodiar la clave de firma fuera del repo (decisión 62).
 - **CO:** ¿trato de tú o de usted? Se decide con la validación local en F3.
 - **iOS:** recorte por documentar (disparo en segundo plano, cambio de icono con alerta y nombre fijo).
-- **Pico técnico de F2:** AAC a 16 kHz en MediaCodec en gama baja; SQLCipher y FTS5 juntos en op-sqlite; WebCrypto X25519 y Ed25519 en los navegadores de los contactos; duración del fragmento (2, 4 u 8 s) y consumo con la ubicación cada minuto.
+- **Pico técnico de F2:** AAC a 16 kHz en MediaCodec en gama baja; SQLCipher y FTS5 juntos en op-sqlite; WebCrypto X25519 en los navegadores de los contactos (la bóveda no usa Ed25519); duración del fragmento (2, 4 u 8 s) y consumo con la ubicación cada minuto.
 - **Validadores:** reclutar y proteger a quien firme en VE.
 - **Falsas alarmas del aviso por falta de señales** (apagones, viajes sin red): por eso va apagado, con umbral a elegir, pausa y recordatorio local. Se miden en el piloto.
-- **Retención:** la evidencia se guarda hasta que la persona la borra. Falta decidir qué pasa con los incidentes de teléfonos inactivos sin código de recuperación, cuyo borrado ya nadie puede pedir. Se decide en F1.
+- **Retención:** la evidencia se guarda hasta que la persona la borra. Decidido en F1 (decisión 57): ningún borrado automático de incidentes de teléfonos inactivos en la v1 ni en el piloto.
+- **Límites declarados en F1:**
+  - la cuenta de Cloudflare es la raíz de confianza: quien la controle puede servir una bóveda que robe las claves de los contactos. La vía independiente es el paquete descargado más el verificador abierto, y la bóveda reproducible llega antes del piloto;
+  - cada host que guardó claves de contactos también es raíz de confianza: un proyecto o subdominio que sirvió la bóveda nunca se borra ni se renombra, porque otra persona podría registrar el mismo nombre; al retirarlo, sirve solo una página que borra el almacenamiento;
+  - el APK publicado revela los hosts a quien lo desensamble;
+  - visitar la página de presentación delata el interés ante la operadora (SNI); la app nunca se conecta a ella;
+  - si workers.dev y pages.dev quedan bloqueados a la vez en VE, no hay respaldo sin un dominio propio;
+  - la visita con la clave en el enlace puede quedar en el historial del navegador del contacto (se mide en F2);
+  - Safari y los navegadores WebKit borran la clave del contacto tras 7 días sin abrir el enlace: quien no guardó el enlace pierde el acceso hasta que se le reinvite;
+  - el paquete descargado nombra a Vigía en sus instrucciones de verificación;
+  - un APK de pruebas en manos de una persona real expondría su evidencia al equipo (decisión 58);
+  - con root, el PIN de modo base se puede probar por fuerza bruta contra el Keystore del teléfono: la envoltura con el PIN (decisión 60) sube el coste, no lo impide;
+  - el señuelo deja huellas que la app no controla: tamaño de los datos en Ajustes, panel de privacidad, "Apps activas", batería y datos por app;
+  - aceptar los sobres de un teléfono revocado le revela la revocación a quien lo tiene;
+  - si la cola no funciona antes del primer desbloqueo, tras un reinicio nada sube hasta que la persona desbloquea el teléfono (se decide en F2).
 - **Paquete exportado:** una vez fuera, su seguridad depende de la app por la que se envíe. La app lo advierte antes de compartir.
 
 ## Referencias
