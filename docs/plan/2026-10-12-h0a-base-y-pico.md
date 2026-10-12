@@ -6,12 +6,22 @@
 
 **Arquitectura:**
 - Todo el código de terceros (npm, Gradle, SDK de Android, wrangler y Playwright) corre en el contenedor `vigia-build` o en contenedores efímeros que comparten su red. Nunca en la máquina de trabajo.
-- `vigia-build` lee el repo y el banco en solo lectura (`/fuente/vigia` y `/fuente/banco`), trabaja en su propio volumen (`/work`) y deja los resultados en `/salida`. Nada que genere entra al repo sin revisión.
+- `vigia-build` lee el repo y el banco en solo lectura (`/fuente/vigia` y `/fuente/banco`) y trabaja en su propio volumen (`/work`). Sus resultados se sacan con `docker cp -L` (ver "Notas de la ejecución"). Nada que genere entra al repo sin revisión.
 - El banco del pico es un repositorio git local aparte, sin remoto. A `main` solo llegan sus resultados, en `docs/pico/informe.md`.
 
 **Stack:** Ubuntu 24.04 (fijada por digest), OpenJDK 17, Node 24.21.0, SDK de Android (cmdline-tools 15859902), Expo SDK 57 (`expo` 57.0.26), `@op-engineering/op-sqlite` 18.2.5, BouncyCastle `bcprov-jdk18on` 1.86, `@hpke/core` 1.9.0, Playwright 1.63.0, wrangler 4.147.0 y gitleaks 8.30.1. Todas publicadas hace 7 días o más el 12-oct-2026.
 
 **Spec:** `docs/plan/2026-10-12-plan-maestro-f2.md` (hito H0a y P1, P5 y P6), `DESIGN.md`, y las órdenes con rutas de la máquina en el archivo privado `h0a-entorno.md`.
+
+## Notas de la ejecución (12-oct-2026)
+
+La revisión independiente de H0a cambió algunas cosas respecto a las tareas de abajo. Lo vigente es esto:
+- **Sin `/salida`.** El contenedor deja sus resultados en `/work/salida` y se sacan con `docker cp -L vigia-build:/work/salida/<archivo> <destino>`. `-L` resuelve los enlaces dentro del contenedor, así que el código de terceros no puede hacer que una copia en la máquina de trabajo lea un archivo del host. Antes de copiar algo al repo se comprueba que es un archivo normal.
+- **Sin el `.git` del repo.** Un tmpfs vacío tapa `/fuente/vigia/.git`: el código de terceros no ve lo que los hooks rechazaron ni la configuración local.
+- **Todo fijado en el Dockerfile.** apt sale de una instantánea fechada del archivo de Ubuntu (`APT_SNAPSHOT`, con el JDK 17.0.20.1); pnpm y platform-tools se descargan por URL con SHA-256; build-tools, plataforma, NDK y CMake se preinstalan con versión exacta, y el SDK queda de solo lectura para el usuario del build.
+- **Pruebas de la página en `pruebas/sitio/`,** fuera de la carpeta que publica Pages, con wrangler en su lockfile (resuelto con `npm install --before`) en lugar de `npx --yes`.
+- **Red interna `vigia-p7`** para toxiproxy (P7), sin salida a internet ni puertos publicados.
+- **Hooks:** ver la nota de la tarea 4. Hay además un `pre-push` que revisa todo lo que se publica, y `.githooks/revisados.sha256` con los blobs que una persona revisó.
 
 ## Restricciones globales
 
@@ -288,7 +298,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 - Produce: `comprobar.py pre-commit`, `comprobar.py commit-msg <archivo>`, `comprobar.py secretos [<archivo>]` y `comprobar.py huellas-desde <archivo>`. Devuelve 0 si todo está bien y 1 si rechaza; nunca imprime el texto que coincidió, solo la regla y el archivo.
 - Lee de la configuración local de git: `vigia.patrones` (ruta de la lista privada) y `vigia.gitleaks` (imagen de gitleaks fijada por digest). Ninguna ruta de la máquina va al repo.
 
-> Nota del 12-oct-2026, al ejecutar: una revisión de seguridad encontró que la versión de abajo, que interpreta la salida de `git diff`, se podía saltar sin querer. Con `commit -a`, gitleaks leía el índice viejo y un token entraba. Las rutas con tildes, `diff.noprefix`, `.gitattributes` con `binary`, las líneas con `#` del mensaje y una lista de patrones vacía también dejaban pasar texto. El código vigente está en `.githooks/` (commits "Hace que los hooks revisen lo que de verdad entra en el commit" y "Revisa también lo que esconden la tijera, los invisibles y UTF-16"). Las reglas y gitleaks (`comprobar.py secretos`, por stdin y sin montar nada) reciben las mismas lecturas de los blobs del índice y revisan la ruta, el archivo completo y el mensaje entero; una lista de patrones mal formada bloquea. El código de abajo queda como registro del plan.
+> Nota del 12-oct-2026, al ejecutar: una revisión de seguridad encontró que la versión de abajo, que interpreta la salida de `git diff`, se podía saltar sin querer. Con `commit -a`, gitleaks leía el índice viejo y un token entraba. Las rutas con tildes, `diff.noprefix`, `.gitattributes` con `binary`, las líneas con `#` del mensaje y una lista de patrones vacía también dejaban pasar texto. El código vigente está en `.githooks/`, tras tres rondas de revisión. Las reglas y gitleaks (por stdin y sin montar nada) reciben las mismas lecturas de los blobs y revisan la ruta, el archivo completo y el mensaje entero. Una lista de patrones mal formada bloquea, y `huellas-desde` rechaza las líneas de más de 8 palabras. Los nombres coinciden en cualquier orden, pegados y con iniciales; los teléfonos, fijos y móviles con cualquier agrupación. Los binarios y los punteros de LFS se bloquean salvo que estén en `.githooks/revisados.sha256`, y `pre-push` repite todo sobre lo que se publica, autores y etiquetas incluidos. El código de abajo queda como registro del plan.
 
 - [ ] **Paso 1: escribir las pruebas que fallan, `.githooks/test_comprobar.py`**
 
@@ -365,7 +375,7 @@ class PruebasComprobar(unittest.TestCase):
         self.assertEqual(self.comprobar("pre-commit").returncode, 0)
 
     def test_telefono_ve_rechazado(self):
-        for numero in (tel("+5", "8 412 555 1234"), tel("0", "412-555-1234")):
+        for numero in (tel("+58 41", "2 555 1234"), tel("04", "12-555-1234")):
             with self.subTest(numero=numero):
                 self.preparar(f"Llama al {numero}\n")
                 self.assertEqual(self.comprobar("pre-commit").returncode, 1)
