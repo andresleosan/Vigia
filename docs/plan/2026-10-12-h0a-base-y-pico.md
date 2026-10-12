@@ -200,7 +200,7 @@ Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>"
 - [ ] **Paso 2: registro privado.** La persona responsable lo saca de la máquina o lo cifra (guía del archivo privado). Comprobación: en la máquina de trabajo no queda una copia en claro.
 - **Paso 3 (quitado el 12-oct-2026): caché del token de GitHub.** Decisión de la persona responsable; detalle en el archivo privado.
 - [ ] **Paso 4: sesiones fuera de la memoria automática.** Claude localiza, solo leyendo, la configuración de los procesos automáticos de memoria y resumen; la persona responsable excluye las sesiones de Vigía. Comprobación anotada en el archivo privado.
-- [ ] **Paso 5: ajustes de GitHub.** Regla de `main` contra el push forzado y el borrado, escaneo de secretos, protección de push y aviso privado de vulnerabilidades. Comprobación: captura o descripción de cada ajuste en el archivo privado.
+- [ ] **Paso 5: ajustes de GitHub.** Escaneo de secretos, protección de push y aviso privado de vulnerabilidades. La regla de `main` contra el push forzado y el borrado se quitó el 12-oct-2026 por decisión de la persona responsable. Comprobación: captura o descripción de cada ajuste en el archivo privado.
 - [ ] **Paso 6: proyecto de Pages `vigiaapp`.** Creado con la rama `main`, sin framework, sin orden de build y con salida `sitio`; la app de GitHub de Cloudflare solo con acceso a este repo. Comprobación: tras el push de la etiqueta de H0a, `vigiaapp.pages.dev` sirve la página (tarea 5, paso 8).
 
 ### Tarea 3: base del repositorio

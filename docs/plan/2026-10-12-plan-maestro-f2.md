@@ -188,7 +188,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
     - el entorno de build aislado, con versiones fijadas de JDK 17, SDK de Android de línea de comandos, build-tools, NDK, CMake, Node y pnpm;
     - Playwright en su imagen oficial, compartiendo la red del entorno de build y sin puertos publicados;
     - una red aislada para toxiproxy (P7), con las mismas reglas.
-  - Lo que hace la persona responsable, con los pasos que da Claude: sacar de la máquina el registro privado o cifrarlo con una clave que no viva en ella; comprobar que las sesiones de Vigía quedan fuera de los procesos automáticos de memoria y resumen; y los ajustes de GitHub (regla que bloquea en `main` el push forzado y el borrado, escaneo de secretos y protección de push).
+  - Lo que hace la persona responsable, con los pasos que da Claude: sacar de la máquina el registro privado o cifrarlo con una clave que no viva en ella; comprobar que las sesiones de Vigía quedan fuera de los procesos automáticos de memoria y resumen; y los ajustes de GitHub (escaneo de secretos y protección de push).
   - `.gitignore`: `.dev.vars`, `.env*`, keystores, APK, `node_modules` y la configuración de entornos.
   - `SECURITY.md`: aviso privado de vulnerabilidades de GitHub, sin contactos personales.
   - Hooks de pre-commit y commit-msg con gitleaks de versión fijada (ver "Cómo trabajamos"), y la lista privada de patrones con los nombres del registro privado.
@@ -1175,7 +1175,7 @@ Vienen de dos revisiones (servidor y criptografía; cliente, app y bóveda) y de
 | SUM-03 | Sin OTA | Sin expo-updates ni carga de JS remoto | `pnpm why` vacío; arranca en modo avión sin servidor | H2 |
 | SUM-04 | Firma del APK | Clave de release fuera del repo y de EAS, copias cifradas, firmas v2 y v3 con linaje, huella publicada | `apksigner verify` | Fuera de F2: antes del primer APK que salga de los teléfonos de prueba |
 | SUM-05 | Bóveda reproducible | Build determinista y hashes publicados; `verificar-boveda` | Dos builds dan los mismos hashes | Antes del piloto (F4) |
-| SUM-06 | Repo público | Regla contra el push forzado y el borrado de `main`; escaneo de secretos y protección de push; se empuja solo la etiqueta aprobada | Ajustes de GitHub; `git ls-remote` | H0a |
+| SUM-06 | Repo público | Escaneo de secretos y protección de push; se empuja solo la etiqueta aprobada | Ajustes de GitHub; `git ls-remote` | H0a |
 | SUM-07 | Gradle | Versiones exactas; wrapper con `distributionSha256Sum`; verification-metadata | Revisión de los build.gradle y del wrapper | H1, H2 |
 | OPS-01 | Cuenta de Cloudflare | Cuenta dedicada a Vigía; 2FA con llave; token mínimo con caducidad; subdominio de workers.dev neutro; desplegar desde un árbol limpio; sin conectores con OAuth amplio; revisar el registro de auditoría | Panel y `wrangler whoami` | H0b |
 | OPS-02 | Plan y abuso | Workers Paid antes del piloto; tope global de altas por hora sin IP, con su cota calculada; el alta en cola nunca impide grabar; limits en wrangler | Por encima del tope: 429 y el teléfono sigue grabando; plan visible en el panel | H1, H3a, H8b |
