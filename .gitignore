@@ -1,0 +1,18 @@
+# Dependencias y salidas de build
+node_modules/
+.gradle/
+build/
+dist/
+.expo/
+*.apk
+*.aab
+# Secretos y claves (SEC-01)
+.dev.vars
+.env*
+*.keystore
+*.jks
+*.p12
+# Informes de pruebas y estado local de wrangler
+playwright-report/
+test-results/
+.wrangler/
