@@ -96,6 +96,11 @@ class PruebasReglas(Base):
     def test_correos(self):
         self.assertTrue(self.rechaza(f"Escribe a alguien{ARROBA}correo.com\n"))
         self.assertFalse(self.rechaza(f"prueba{ARROBA}example.invalid\n"))
+        # una dirección permitida no tapa la que va pegada detrás
+        for texto in (f"prueba{ARROBA}example.com-juan.perez{ARROBA}correo.com",
+                      f"noreply{ARROBA}anthropic.com.1juan{ARROBA}correo.com"):
+            with self.subTest(texto=texto):
+                self.assertTrue(self.rechaza(texto + "\n"))
 
     def test_telefonos_rechazados(self):
         guion, guion_duro, braille = chr(0x2013), chr(0x2011), chr(0x2800)
@@ -109,7 +114,7 @@ class PruebasReglas(Base):
             tel("0414", guion_duro, "555", guion_duro, "1234"), tel("412-55", "5-1234"),
             tel("+58 (412) 55", "5 1234"), tel("+58 (0) 412 55", "5 1234"), tel("+58 0412 55", "5 1234"),
             tel("0412_55", "5_1234"), braille.join("0412555" + "1234"), tel("tel_0412", "5551234"),
-            tel("212.55", "5.12.34"),
+            tel("212.55", "5.12.34"), tel("212.55.", "51.234"), tel("241.12.", "34.200"),
             # CO móviles y fijos
             tel("+57 300 55", "5 12 34"), tel("300 55", "51234"), tel("(300) 55", "51234"),
             tel("300 55", "5 12 34"), tel("+57 601 55", "5 1234"), tel("601 55", "5 1234"),
@@ -126,7 +131,7 @@ class PruebasReglas(Base):
                       "https://mobbin.com/flows/b3c2b6da-8cb9-4312-8112-12bb74cb7ce8",
                       "Servidor de pruebas: 203.0.113.195 (RFC 5737).", "Red 203.0.113.0/24",
                       "Firma con StrongBox, p50/p95/p99: 230/980/1250 ms.",
-                      '"CF-Connecting-IP": "216.58.214.14"', "ms\n230\n1250\n980", "- 320\n- 768\n- 1024"):
+                      '"CF-Connecting-IP": "203.0.113.7"', "ms\n230\n1250\n980", "- 320\n- 768\n- 1024"):
             with self.subTest(texto=texto):
                 self.assertFalse(self.rechaza(texto + "\n"))
 
@@ -193,8 +198,8 @@ class PruebasReglas(Base):
 
     def test_huellas_desde(self):
         self.lista("Zoila  Fícticia")
-        self.assertEqual(self.patrones.read_text().split(),
-                         [h("ficticia", "zoila"), h("zoilaficticia"), h("ficticiazoila")])
+        self.assertEqual(self.patrones.read_text().splitlines(),
+                         ["# vigia-huellas 2", h("ficticia", "zoila"), h("zoilaficticia"), h("ficticiazoila")])
 
     def test_huellas_desde_con_camel_case(self):
         self.lista("ZoilaFicticia")
@@ -210,7 +215,8 @@ class PruebasReglas(Base):
         self.assertNotIn("Cinco", r.stderr)
 
     def test_lista_privada_mal_configurada_bloquea(self):
-        for contenido in ("", h("ficticia", "zoila") + "\nzoila ficticia\n", None):
+        for contenido in ("", "# vigia-huellas 2\n" + h("ficticia", "zoila") + "\nzoila ficticia\n",
+                          h("ficticia", "zoila") + "\n", None):  # vacía, línea mala, sin marca, sin archivo
             with self.subTest(contenido=contenido):
                 if contenido is None:
                     self.patrones.unlink()
@@ -220,7 +226,7 @@ class PruebasReglas(Base):
                 self.assertNotEqual(self.comprobar("pre-commit").returncode, 0)
 
     def test_lista_privada_en_mayusculas(self):
-        self.patrones.write_text(h("ficticia", "zoila").upper() + "\n")
+        self.patrones.write_text("# vigia-huellas 2\n" + h("ficticia", "zoila").upper() + "\n")
         self.assertTrue(self.rechaza("Reunión con Zoila Ficticia\n"))
 
     def test_binarios_comprimidos_y_lfs(self):
@@ -386,6 +392,19 @@ class PruebasConGitleaks(Base):
         self.git("tag", "-a", "zoila-ficticia", "-m", "Hito")
         self.git("tag", "renombrada", "zoila-ficticia")                      # el nombre interno queda
         self.rechazado("refs/tags/renombrada")
+
+    def test_pre_push_revisa_las_firmas(self):
+        self.remoto()
+        arbol = self.git("rev-parse", "HEAD^{tree}").stdout.decode().strip()
+        padre = self.git("rev-parse", "HEAD").stdout.decode().strip()
+        quien = f"prueba <prueba{ARROBA}example.invalid> 1760000000 +0000"
+        crudo = (f"tree {arbol}\nparent {padre}\nauthor {quien}\ncommitter {quien}\n"
+                 f"gpgsig -----BEGIN PGP SIGNATURE-----\n Contacto: alguien{ARROBA}correo.com\n"
+                 f" -----END PGP SIGNATURE-----\n\nPrueba\n")
+        firmado = subprocess.run(["git", "hash-object", "-t", "commit", "-w", "--literally", "--stdin"],
+                                 cwd=self.repo, input=crudo.encode(), capture_output=True, check=True)
+        self.git("update-ref", "refs/heads/firmado", firmado.stdout.decode().strip())
+        self.rechazado("refs/heads/firmado:refs/heads/main")
 
     def test_pre_push_no_se_fia_de_lo_local(self):
         self.remoto()

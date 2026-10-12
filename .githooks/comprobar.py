@@ -18,7 +18,7 @@ pre-push es la última barrera: revisa todo lo que el remoto aún no tiene, se h
 como se haya creado (commit --no-verify, revert, cherry-pick, rebase, merge, etiquetas).
 
 Uso: comprobar.py pre-commit | commit-msg <archivo> | secretos [<archivo>]
-     | pre-push <remoto> <url> (con las referencias por stdin) | huellas-desde <archivo>
+     | pre-push (con las referencias por stdin) | huellas-desde <archivo>
 """
 import hashlib
 import html
@@ -34,7 +34,8 @@ import urllib.parse
 os.environ["GIT_NO_REPLACE_OBJECTS"] = "1"
 
 RAYA = chr(0x2014)
-CORREO = re.compile(r"(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}")
+LOCAL = re.compile(r"[A-Za-z0-9._%+-]{1,64}$")
+DOMINIO = re.compile(r"(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}")
 CORREO_PERMITIDO = re.compile(
     r"^noreply@anthropic\.com$|@users\.noreply\.github\.com$|@example\.(?:com|org|net|invalid)$",
     re.IGNORECASE)
@@ -42,15 +43,15 @@ CORREO_PERMITIDO = re.compile(
 # Teléfonos. El código de área va junto (0414, 412, 300, 601); entre las 7 cifras del abonado
 # caben hasta 3 separadores horizontales (espacio, tabulador, punto, guion o guion bajo, también
 # los guiones tipográficos U+2010 a U+2015 y U+2212); alrededor del prefijo y del código de área,
-# además, paréntesis y barra. Sin saltos de línea, y una IPv4 no cuenta.
+# además, paréntesis y barra. Sin saltos de línea. Las IP de ejemplo de la documentación (RFC 5737)
+# solo chocan con el patrón en 203.0.113.0/24, que no cuenta: las pruebas usan ese rango.
 GUIONES = "".join(map(chr, (*range(0x2010, 0x2016), 0x2212)))
 H = rf"[ \t.\-_{GUIONES}]"
 S = rf"[ \t.()/\-_{GUIONES}]"
 SEP = S + "{0,3}"
 SIETE = (H + "{0,3}").join([r"\d"] * 7)
-OCTETO = r"(?:25[0-5]|2[0-4]\d|1?\d?\d)"
 TELEFONO = re.compile(
-    rf"(?<![^\W_])(?!{OCTETO}(?:\.{OCTETO}){{3}}(?![\d.]))(?:"
+    rf"(?<![^\W_])(?!203\.0\.113\.\d{{1,3}}(?![\d.]))(?:"
     rf"\(?(?:\+|00)?{SEP}58{SEP}(?:\(?0\)?)?{SEP}\(?[24]\d\d\)?{SEP}{SIETE}"   # VE con prefijo (o wa.me)
     rf"|\(?(?:\+|00)?{SEP}57{SEP}\(?(?:3\d\d|60\d)\)?{SEP}{SIETE}"            # CO con prefijo
     rf"|\(?0[24]\d\d\)?{SEP}{SIETE}"                                           # VE nacional
@@ -58,6 +59,7 @@ TELEFONO = re.compile(
     r")(?![^\W_])")
 
 MAX_PALABRAS = 8   # huellas-desde rechaza las líneas más largas
+FORMATO = "# vigia-huellas 2"  # primera línea de la lista: otra forma de calcular las huellas no coincidiría
 FRASE = 4          # frases seguidas de hasta 4 palabras ("Zoila de la Prueba")
 VENTANA = 6        # dos palabras que identifican, a menos de 6 de distancia, cuentan como el nombre
 PARTICULAS = {"de", "del", "la", "las", "los", "el", "y", "e", "da", "das", "do", "dos", "van", "von", "der"}
@@ -148,6 +150,15 @@ def huellas(textos):
     return {huella(f) for f in frases}
 
 
+def correos(texto):
+    """Cada dirección alrededor de cada @, por separado: una permitida no tapa la que va pegada."""
+    for m in re.finditer("@", texto):
+        local = LOCAL.search(texto, max(0, m.start() - 64), m.start())
+        dominio = DOMINIO.match(texto, m.end(), m.end() + 255)
+        if local and dominio:
+            yield local.group(0) + "@" + dominio.group(0)
+
+
 def opaco(contenido):
     """Lo que las reglas no pueden leer: binarios (bytes NUL), comprimidos, PDF y punteros de LFS."""
     return b"\0" in contenido or contenido.startswith(LFS) or contenido.startswith(MAGICOS)
@@ -166,7 +177,7 @@ def problemas(contenido, patrones, revisado=False):
             hallados.add("número de teléfono")
         if opaco(contenido):
             hallados.add("binario, comprimido o puntero de Git LFS sin revisar")
-    if any(not CORREO_PERMITIDO.search(m.group(0)) for t in vistas for m in CORREO.finditer(t)):
+    if any(not CORREO_PERMITIDO.search(c) for t in vistas for c in correos(t)):
         hallados.add("correo que no es noreply")
     if not patrones.isdisjoint(huellas(vistas)):
         hallados.add("coincide con un patrón privado")
@@ -184,14 +195,15 @@ def config(clave):
 def cargar_patrones():
     try:
         with open(config("vigia.patrones"), encoding="utf-8") as f:
-            lineas = [l.strip().lower() for l in f if l.strip()]
+            lineas = [l.strip() for l in f if l.strip()]
     except (OSError, UnicodeError):
         lineas = []
-    # Una lista vacía o con líneas que no son huellas dejaría pasar los nombres: se bloquea.
-    if not lineas or not all(re.fullmatch(r"[0-9a-f]{64}", l) for l in lineas):
-        sys.exit("La lista privada de patrones (git config vigia.patrones) falta, está vacía "
-                 "o tiene líneas que no son huellas SHA-256. Bloqueado.")
-    return set(lineas)
+    # Una lista vacía, de otro formato o con líneas que no son huellas dejaría pasar nombres: se bloquea.
+    huellas_ = [l.lower() for l in lineas[1:]]
+    if not lineas or lineas[0] != FORMATO or not huellas_ or not all(re.fullmatch(r"[0-9a-f]{64}", h) for h in huellas_):
+        sys.exit("La lista privada de patrones (git config vigia.patrones) falta, está vacía, no tiene la "
+                 f"marca «{FORMATO}» o tiene líneas que no son huellas. Regénerala con huellas-desde. Bloqueado.")
+    return set(huellas_)
 
 
 def revisados_en(rev):
@@ -249,18 +261,12 @@ def identidades_publicas():
 
 
 def objeto_git(sha, clase, aprobadas):
-    """Piezas de un commit o de una etiqueta: su texto entero (cabeceras incluidas, como mergetag
-    o el nombre interno de la etiqueta, salvo hashes y firmas) y cada autor no aprobado."""
+    """Piezas de un commit o de una etiqueta: su texto entero (cabeceras incluidas, como mergetag,
+    las firmas o el nombre interno de la etiqueta, salvo los hashes) y cada autor no aprobado."""
     cabecera, _, texto = git("cat-file", clase, sha).partition(b"\n\n")
     donde = f"{'commit' if clase == 'commit' else 'etiqueta'} {sha[:7]}: "
-    piezas, lineas, firma = [], [], False
+    piezas, lineas = [], []
     for linea in cabecera.split(b"\n"):
-        if linea.startswith((b"gpgsig ", b"gpgsig-sha256 ")):
-            firma = True
-            continue
-        if firma and linea.startswith(b" "):
-            continue
-        firma = False
         m = IDENTIDAD.fullmatch(linea)
         if m:
             identidad = m.group(2) + b" <" + m.group(3) + b">"
@@ -276,25 +282,13 @@ def existe(sha):
     return subprocess.run(["git", "cat-file", "-e", sha], capture_output=True).returncode == 0
 
 
-def publicado(url, refs):
-    """Lo que el destino ya tiene: los SHA remotos que trae git por stdin y los que lista
-    git ls-remote. Nunca refs/remotes: es estado local y puede estar viejo."""
-    shas = {r for *_, r in refs if r != CEROS}
-    try:
-        r = subprocess.run(["git", "ls-remote", url], capture_output=True, text=True, timeout=60,
-                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
-        if r.returncode == 0:
-            shas |= {l.split()[0] for l in r.stdout.splitlines() if l.strip()}
-    except subprocess.TimeoutExpired:
-        pass  # sin respuesta: se revisa de más, nunca de menos
-    return {s for s in shas if existe(s)}
-
-
-def empujado(url, lineas):
+def empujado(lineas):
     """Piezas de todo lo que el push publica y el remoto no tiene, los blobs revisados y los
-    fallos que no dependen del contenido."""
+    fallos que no dependen del contenido. Lo publicado es solo lo que git negoció con el destino
+    (los SHA remotos de stdin), nunca refs/remotes ni otra consulta: una etiqueta se empuja junto
+    con su rama, o se revisa también lo ya publicado."""
     refs = [l.split() for l in lineas if l.strip()]
-    ya = publicado(url, refs)
+    ya = {r for *_, r in refs if r != CEROS and existe(r)}
     aprobadas = identidades_publicas()
     piezas, vistos, revisados, fallos = [], set(), set(), []
     if os.path.exists(git("rev-parse", "--git-path", "info/grafts").decode().strip()):
@@ -382,7 +376,7 @@ def huellas_desde(ruta):
             for h in map(huella, frases):
                 if h not in salida:
                     salida.append(h)
-    print(*salida, sep="\n")
+    print(FORMATO, *salida, sep="\n")
     return 0
 
 
@@ -391,8 +385,8 @@ def main(argv):
     extra = []
     if modo == "huellas-desde":
         return huellas_desde(argv[2])
-    if modo == "pre-push" and len(argv) == 4:
-        piezas, revisados, extra = empujado(argv[3], sys.stdin.read().splitlines())
+    if modo == "pre-push" and len(argv) == 2:
+        piezas, revisados, extra = empujado(sys.stdin.read().splitlines())
     elif modo in ("pre-commit", "secretos") and len(argv) == 2:
         piezas, revisados = preparado(), revisados_en("")
     elif modo in ("commit-msg", "secretos") and len(argv) == 3:

@@ -1,3 +1,3 @@
 #!/bin/sh
 # Última barrera antes de publicar: revisa todo lo que el push saca de esta máquina (REPO-01).
-exec python3 -I "$(dirname "$0")/comprobar.py" pre-push "$1" "$2"
+exec python3 -I "$(dirname "$0")/comprobar.py" pre-push
