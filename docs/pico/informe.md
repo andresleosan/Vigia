@@ -44,7 +44,7 @@ Todas publicadas hace 7 días o más el 12-oct-2026.
 - Pregunta: ¿se compila sin emulador, en la máquina de build, una app Expo con un módulo Kotlin propio y op-sqlite con SQLCipher y FTS5?
 - Medición: andamio de create-expo-app 5.0.0 (Expo SDK 57, React Native 0.86.3), op-sqlite 18.2.5 con `sqlcipher` y `fts5`, un módulo Kotlin local mínimo, `expo prebuild` y Gradle 9.3.1 en release con un APK por ABI (armeabi-v7a, arm64-v8a y x86_64), con JDK 17.
 - Resultado:
-  - desde un clon limpio del banco y con un solo comando, en el contenedor fijado y con el SDK de solo lectura: `BUILD SUCCESSFUL` en 5 min 7 s (360 tareas), sin bajar nada al SDK;
+  - desde un clon limpio del banco y con un solo comando, en el contenedor fijado y con el SDK de solo lectura: `BUILD SUCCESSFUL` en 4 min 42 s (360 tareas), sin bajar nada al SDK;
   - línea base de tamaño, sin R8 ni recorte de recursos:
 
     | ABI | Bytes |
