@@ -50,7 +50,7 @@ class Base(unittest.TestCase):
         return subprocess.run(["git", *args], cwd=self.repo, check=True, capture_output=True)
 
     def comprobar(self, *args, entrada=None):
-        return subprocess.run([sys.executable, "-I", str(SCRIPT), *args], cwd=self.repo,
+        return subprocess.run([sys.executable, "-I", "-B", str(SCRIPT), *args], cwd=self.repo,
                               capture_output=True, text=True, input=entrada)
 
     def lista(self, *nombres):
@@ -98,7 +98,7 @@ class PruebasReglas(Base):
         self.assertFalse(self.rechaza(f"prueba{ARROBA}example.invalid\n"))
 
     def test_telefonos_rechazados(self):
-        guion, guion_duro = chr(0x2013), chr(0x2011)
+        guion, guion_duro, braille = chr(0x2013), chr(0x2011), chr(0x2800)
         numeros = (
             # VE con prefijo, nacionales, fijos, en pares y sin el 0
             tel("+58 414 55", "5 12 34"), tel("0414-55", "5.12.34"), tel("(0414) 55", "5.12.34"),
@@ -108,6 +108,8 @@ class PruebasReglas(Base):
             tel("0414/55", "51234"), tel("0414", guion, "555", guion, "1234"),
             tel("0414", guion_duro, "555", guion_duro, "1234"), tel("412-55", "5-1234"),
             tel("+58 (412) 55", "5 1234"), tel("+58 (0) 412 55", "5 1234"), tel("+58 0412 55", "5 1234"),
+            tel("0412_55", "5_1234"), braille.join("0412555" + "1234"), tel("tel_0412", "5551234"),
+            tel("212.55", "5.12.34"),
             # CO móviles y fijos
             tel("+57 300 55", "5 12 34"), tel("300 55", "51234"), tel("(300) 55", "51234"),
             tel("300 55", "5 12 34"), tel("+57 601 55", "5 1234"), tel("601 55", "5 1234"),
@@ -121,7 +123,10 @@ class PruebasReglas(Base):
         for texto in ("61fc662f01996cd06d713dacf5e133167bd309a1f329442d53f1e21a47b3ede6 04125551234567",
                       "Límite: 2.147.483.647 filas", "Versión 4.147.0, 12-oct-2026, 33.002.634 bytes",
                       "Identificador 3005551234 sin separadores", "Ritmo: 4 / 8 / 12 / 16 / 24 / 32 dp",
-                      "https://mobbin.com/flows/b3c2b6da-8cb9-4312-8112-12bb74cb7ce8"):
+                      "https://mobbin.com/flows/b3c2b6da-8cb9-4312-8112-12bb74cb7ce8",
+                      "Servidor de pruebas: 203.0.113.195 (RFC 5737).", "Red 203.0.113.0/24",
+                      "Firma con StrongBox, p50/p95/p99: 230/980/1250 ms.",
+                      '"CF-Connecting-IP": "216.58.214.14"', "ms\n230\n1250\n980", "- 320\n- 768\n- 1024"):
             with self.subTest(texto=texto):
                 self.assertFalse(self.rechaza(texto + "\n"))
 
@@ -134,17 +139,33 @@ class PruebasReglas(Base):
     def test_patron_en_otras_formas(self):
         for texto in ("Reunión con Zoila\nFicticia mañana",   # partido en dos líneas
                       "FICTICIA, ZOILA",                      # orden de los listados oficiales
+                      "Lista: FICTICIA PÉREZ, ZOILA MARÍA",   # con segundo nombre y apellido
+                      "Con Zoila María Ficticia",             # palabras entre medias
                       "Zoila M. Ficticia",                    # con una inicial
+                      "<p>Con <strong>Zoila</strong> Ficticia</p>", "<p>Zoila<br>Ficticia</p>",
                       "https://zoilaficticia.org/informe",    # pegado, en un dominio
                       "const contactoZoilaFicticia = 1;"):    # camelCase
             with self.subTest(texto=texto):
                 self.assertTrue(self.rechaza(texto + "\n"))
+
+    def test_registro_con_mas_o_menos_palabras(self):
+        self.lista("Zoila María Ficticia Pérez")
+        for texto in ("Zoila Ficticia", "Zoila Ficticia Pérez"):
+            with self.subTest(texto=texto):
+                self.assertTrue(self.rechaza(texto + "\n"))
+        self.lista("Zoila M. Ficticia")
+        self.assertTrue(self.rechaza("Zoila Ficticia\n"))
 
     def test_patron_en_el_nombre_del_archivo(self):
         self.preparar("Texto limpio\n", nombre="notas-zoila-ficticia.txt")
         r = self.comprobar("pre-commit")
         self.assertEqual(r.returncode, 1)
         self.assertNotIn("oila", r.stderr)  # la ruta tampoco se imprime
+
+    def test_telefono_en_el_nombre_del_archivo(self):
+        for nombre in (tel("pruebas/llamada_0412", "5551234.txt"), tel("grabaciones/+58412", "5551234_2026.txt")):
+            with self.subTest(nombre=nombre):
+                self.assertTrue(self.rechaza("Texto limpio\n", nombre=nombre))
 
     def test_invisibles(self):
         zwsp, shy, wj, cgj = chr(0x200B), chr(0x00AD), chr(0x2060), chr(0x034F)
@@ -157,7 +178,9 @@ class PruebasReglas(Base):
 
     def test_escapes(self):
         for texto in (f'{{"n": "Zoil{B}u0061 Ficticia"}}', f"Zoil{B}x61 Ficticia", "Zoil&#97; Ficticia",
-                      "?q=Zoila%20Ficticia", tel("mailto:alguien%", "40correo.com"), "Zoila&nbsp;Ficticia"):
+                      "?q=Zoila%20Ficticia", "?q=Zoila%20F%EDct%EDcia", tel("mailto:alguien%", "40correo.com"),
+                      "Zoila&nbsp;Ficticia", f'"reunión con{B}nzoila ficticia"',
+                      tel(f'"Llama a:{B}n0414-55', '5-1234"'), tel(f'"Tel.{B}t0212 55', '5 1234"')):
             with self.subTest(texto=texto):
                 self.assertTrue(self.rechaza(texto + "\n"))
 
@@ -170,7 +193,8 @@ class PruebasReglas(Base):
 
     def test_huellas_desde(self):
         self.lista("Zoila  Fícticia")
-        self.assertEqual(self.patrones.read_text().split(), [h("ficticia", "zoila"), h("zoilaficticia")])
+        self.assertEqual(self.patrones.read_text().split(),
+                         [h("ficticia", "zoila"), h("zoilaficticia"), h("ficticiazoila")])
 
     def test_huellas_desde_con_camel_case(self):
         self.lista("ZoilaFicticia")
@@ -199,22 +223,28 @@ class PruebasReglas(Base):
         self.patrones.write_text(h("ficticia", "zoila").upper() + "\n")
         self.assertTrue(self.rechaza("Reunión con Zoila Ficticia\n"))
 
-    def test_binarios_y_lfs(self):
+    def test_binarios_comprimidos_y_lfs(self):
         png = bytes([0x89]) + b"PNG" + bytes(4) + b"IHDR"
         lfs = b"version https://git-lfs.github.com/spec/v1\noid sha256:" + b"a" * 64 + b"\nsize 12\n"
-        for contenido in (png, lfs, NOMBRE.encode("utf-16")):
+        pdf = b"%PDF-1.4\n1 0 obj\n<< /Filter [/ASCII85Decode /FlateDecode] >>\n"
+        for contenido in (png, lfs, pdf, NOMBRE.encode("utf-16")):
             with self.subTest(contenido=contenido[:12]):
                 self.git("read-tree", "--empty")
-                self.preparar(contenido, nombre="imagen.png")
+                self.preparar(contenido, nombre="archivo.bin")
                 r = self.comprobar("pre-commit")
                 self.assertEqual(r.returncode, 1)
-                self.assertIn("binario", r.stderr)
+                self.assertIn("sin revisar", r.stderr)
 
-    def test_binario_revisado(self):
+    def test_revisados(self):
         png = bytes([0x89]) + b"PNG" + bytes(4) + b"IHDR"
-        self.preparar(png, nombre="imagen.png")
-        self.preparar(hashlib.sha256(png).hexdigest() + "  imagen de prueba\n", nombre=".githooks/revisados.sha256")
-        self.assertEqual(self.comprobar("pre-commit").returncode, 0)
+        prueba = tel("Teléfono ficticio de prueba: 0412 55", "5 1234\n").encode()
+        con_nombre = tel("Teléfono ficticio: 0412 55", "5 1234. Contacto: Zoila Ficticia\n").encode()
+        lista = "".join(f"{hashlib.sha256(c).hexdigest()}  revisado\n" for c in (png, prueba, con_nombre))
+        self.preparar(lista, nombre=".githooks/revisados.sha256")
+        for contenido, rechaza in ((png, False), (prueba, False), (con_nombre, True)):
+            with self.subTest(contenido=contenido[:20]):
+                self.preparar(contenido, nombre="revisado.bin")
+                self.assertEqual(self.comprobar("pre-commit").returncode, int(rechaza))
         self.preparar("no es una huella\n", nombre=".githooks/revisados.sha256")
         self.assertNotEqual(self.comprobar("pre-commit").returncode, 0)
 
@@ -271,6 +301,25 @@ class PruebasConGitleaks(Base):
     def push(self, *refs):
         return subprocess.run(["git", "push", "-q", "origin", *refs], cwd=self.repo, capture_output=True, text=True)
 
+    def remoto(self, nombre="remoto.git"):
+        """Remoto desnudo nuevo como origin, con un commit limpio ya publicado."""
+        ruta = self.base / nombre
+        subprocess.run(["git", "init", "-q", "--bare", str(ruta)], check=True)
+        self.git("remote", "remove", "origin") if "origin" in self.git("remote").stdout.decode() else None
+        self.git("remote", "add", "origin", str(ruta))
+        if not (self.repo / "base.txt").exists():
+            self.preparar("Texto limpio\n", nombre="base.txt")
+            self.assertEqual(self.commit("-m", "Base").returncode, 0)
+        r = self.push("HEAD:refs/heads/main")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.git("fetch", "-q", "origin")
+        return ruta
+
+    def rechazado(self, *refs):
+        r = self.push(*refs)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("Rechazado", r.stderr)
+
     def test_hooks_de_commit(self):
         self.preparar("Texto limpio\n")
         self.assertEqual(self.commit("-m", "Base").returncode, 0)
@@ -294,21 +343,13 @@ class PruebasConGitleaks(Base):
         r = self.commit("-m", "Vectores")
         self.assertEqual(r.returncode, 0, r.stderr)
 
-    def test_pre_push(self):
-        remoto = self.base / "remoto.git"
-        subprocess.run(["git", "init", "-q", "--bare", str(remoto)], check=True)
-        self.git("remote", "add", "origin", str(remoto))
-        self.preparar("Texto limpio\n")
-        self.commit("-m", "Base")
-        r = self.push("HEAD:refs/heads/main")
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.git("fetch", "-q", "origin")
+    def test_pre_push_contenido_autores_y_nombres(self):
+        self.remoto()
         autor = f"Zoila Ficticia <zoila{ARROBA}correo.com>"
         casos = (
             ("commit sin hooks", ["--no-verify", "-m", "Prueba"], "HEAD:refs/heads/main"),
             ("autor ajeno", ["--no-verify", "--allow-empty", f"--author={autor}", "-m", "Prueba"],
              "HEAD:refs/heads/main"),
-            ("etiqueta", None, "refs/tags/f2-prueba"),
             ("nombre remoto", ["--allow-empty", "-m", "Prueba"], "HEAD:refs/heads/zoila-ficticia"),
             ("identidad configurada no aprobada", ["--no-verify", "--allow-empty", "-m", "Prueba"],
              "HEAD:refs/heads/main"),
@@ -319,17 +360,10 @@ class PruebasConGitleaks(Base):
                     self.preparar(tel("Llama al 0412 55", "5 1234\n"), nombre="b.txt")
                 if caso == "identidad configurada no aprobada":
                     self.git("config", "user.email", f"prueba{ARROBA}correo.com")
-                if orden:
-                    self.assertEqual(self.commit(*orden).returncode, 0)
-                else:
-                    self.git("tag", "-a", "f2-prueba", "-m", f"Aprobado por alguien{ARROBA}correo.com")
-                r = self.push(destino)
-                self.assertNotEqual(r.returncode, 0)
-                self.assertIn("Rechazado", r.stderr)
+                self.assertEqual(self.commit(*orden).returncode, 0)
+                self.rechazado(destino)
                 self.git("reset", "-q", "--hard", "origin/main")
                 self.git("config", "user.email", f"prueba{ARROBA}example.invalid")
-                if not orden:
-                    self.git("tag", "-d", "f2-prueba")
         # Una identidad personal aprobada de forma explícita sí se publica.
         self.git("config", "user.email", f"prueba{ARROBA}correo.com")
         self.git("config", "vigia.identidad-publica", f"prueba <prueba{ARROBA}correo.com>")
@@ -338,6 +372,40 @@ class PruebasConGitleaks(Base):
         self.git("tag", "-a", "f2-prueba", "-m", "Hito aprobado")
         r = self.push("HEAD:refs/heads/main", "refs/tags/f2-prueba")
         self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_pre_push_etiquetas(self):
+        self.remoto()
+        sucio = tel("Llama al 0412 55", "5 1234\n").encode()
+        objeto = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=self.repo, input=sucio,
+                                capture_output=True, check=True).stdout.decode().strip()
+        self.git("tag", "suelta", objeto)                                    # etiqueta a un blob
+        self.rechazado("refs/tags/suelta")
+        self.git("tag", "-a", "interna", "-m", f"Aprobado por alguien{ARROBA}correo.com")
+        self.git("tag", "-a", "externa", "-m", "Hito", "interna")            # etiqueta anidada
+        self.rechazado("refs/tags/externa")
+        self.git("tag", "-a", "zoila-ficticia", "-m", "Hito")
+        self.git("tag", "renombrada", "zoila-ficticia")                      # el nombre interno queda
+        self.rechazado("refs/tags/renombrada")
+
+    def test_pre_push_no_se_fia_de_lo_local(self):
+        self.remoto()
+        self.preparar(tel("Llama al 0412 55", "5 1234\n"), nombre="b.txt")
+        self.commit("--no-verify", "-m", "Con datos")
+        self.preparar("Texto limpio\n", nombre="b.txt")
+        self.commit("--no-verify", "-m", "Quita los datos")
+        publicado = self.git("rev-parse", "origin/main").stdout.decode().strip()
+        self.git("replace", "--graft", "HEAD", publicado)                    # tapa el commit con datos
+        self.rechazado("HEAD:refs/heads/main")
+        self.git("replace", "-d", self.git("rev-parse", "HEAD").stdout.decode().strip())
+        # Publicado sin hooks en un remoto, y después otro remoto vacío con la misma referencia local.
+        r = subprocess.run(["git", "push", "-q", "--no-verify", "origin", "HEAD:refs/heads/main"],
+                           cwd=self.repo, capture_output=True)
+        self.assertEqual(r.returncode, 0)
+        self.git("fetch", "-q", "origin")
+        vacio = self.base / "vacio.git"
+        subprocess.run(["git", "init", "-q", "--bare", str(vacio)], check=True)
+        self.git("remote", "set-url", "origin", str(vacio))
+        self.rechazado("HEAD:refs/heads/main")
 
 
 if __name__ == "__main__":
