@@ -1,0 +1,11 @@
+#!/bin/sh
+# Reglas del repo público y búsqueda de secretos (REPO-01).
+set -e
+python3 -I .githooks/comprobar.py pre-commit
+imagen=$(git config --get vigia.gitleaks || true)
+[ -n "$imagen" ] || { echo "Falta git config vigia.gitleaks (imagen de gitleaks fijada por digest)." >&2; exit 1; }
+# gitleaks corre en un contenedor sin red, con el repo en solo lectura (ENV-01).
+docker run --rm --network none \
+  -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+  -v "$(git rev-parse --show-toplevel)":/repo:ro \
+  "$imagen" git --pre-commit --staged --redact --no-banner /repo

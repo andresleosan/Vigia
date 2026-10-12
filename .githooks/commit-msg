@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3 -I .githooks/comprobar.py commit-msg "$1"
