@@ -188,7 +188,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
     - el entorno de build aislado, con versiones fijadas de JDK 17, SDK de Android de línea de comandos, build-tools, NDK, CMake, Node y pnpm;
     - Playwright en su imagen oficial, compartiendo la red del entorno de build y sin puertos publicados;
     - una red aislada para toxiproxy (P7), con las mismas reglas.
-  - Lo que hace la persona responsable, con los pasos que da Claude: sacar de la máquina el registro privado o cifrarlo con una clave que no viva en ella; bajar la caché del token de GitHub a 5 min; comprobar que las sesiones de Vigía quedan fuera de los procesos automáticos de memoria y resumen; y los ajustes de GitHub (regla que bloquea en `main` el push forzado y el borrado, escaneo de secretos y protección de push).
+  - Lo que hace la persona responsable, con los pasos que da Claude: sacar de la máquina el registro privado o cifrarlo con una clave que no viva en ella; comprobar que las sesiones de Vigía quedan fuera de los procesos automáticos de memoria y resumen; y los ajustes de GitHub (regla que bloquea en `main` el push forzado y el borrado, escaneo de secretos y protección de push).
   - `.gitignore`: `.dev.vars`, `.env*`, keystores, APK, `node_modules` y la configuración de entornos.
   - `SECURITY.md`: aviso privado de vulnerabilidades de GitHub, sin contactos personales.
   - Hooks de pre-commit y commit-msg con gitleaks de versión fijada (ver "Cómo trabajamos"), y la lista privada de patrones con los nombres del registro privado.
@@ -198,7 +198,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
 - **Excluye:** teléfono, Cloudflare y VE (H0b); código de producto (H1).
 - **Criterios de aceptación:**
   - Desde el entorno de build, leer fuera de su árbol de trabajo y controlar el host fallan; `javac -version` y `jlink --version` responden.
-  - El registro privado no está en claro en la máquina; `git config --get-all credential.helper` muestra la caché de 5 min; la exclusión de las sesiones está comprobada y anotada en el archivo privado.
+  - El registro privado no está en claro en la máquina; la exclusión de las sesiones está comprobada y anotada en el archivo privado.
   - Desde un clon limpio del banco, un solo comando compila en release y termina en BUILD SUCCESSFUL, con un APK por ABI y su tamaño anotado como línea base.
   - El `test-vectors.json` de cfrg/draft-irtf-cfrg-hpke, descargado de un commit fijado y comprobado con su SHA-256, pasa al 100 % en el modo base de la suite 0x0020/0x0001/0x0002, en la JVM (BouncyCastle) y en Node (@hpke/core). El cruce funciona en los dos sentidos.
   - Una firma DER de una clave P-256 de software se verifica en WebCrypto tras convertirla a P1363.
@@ -1296,7 +1296,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 
 | Recurso o decisión | Para qué | Cuándo | Si no llega |
 |---|---|---|---|
-| Pasos de H0a: registro privado fuera de la máquina o cifrado, caché del token a 5 min, exclusión de sesiones y ajustes de GitHub | ENV-01 y SUM-06 | H0a | H0a no cierra |
+| Pasos de H0a: registro privado fuera de la máquina o cifrado, exclusión de sesiones y ajustes de GitHub | ENV-01 y SUM-06 | H0a | H0a no cierra |
 | Proyecto de Pages `vigiaapp` conectado al repo, solo con acceso a Vigia | Publicar la página de presentación | H0a | La página espera |
 | Teléfono Android de gama baja con SIM y datos y la depuración USB activada | H0b y todos los hitos móviles | H0b | H1 se adelanta; H2 no empieza |
 | adb en el portátil (USB o depuración inalámbrica en la red local) y ejecutar los guiones de adb | Instalar APK, Doze, logcat, `run-as`, capturas, pruebas instrumentadas y, en F4, Maestro | H0b | Muchos criterios no se pueden comprobar |
