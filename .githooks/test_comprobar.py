@@ -74,7 +74,8 @@ class PruebasComprobar(unittest.TestCase):
         self.assertEqual(self.comprobar("pre-commit").returncode, 0)
 
     def test_telefono_ve_rechazado(self):
-        for numero in (tel("+5", "8 412 555 1234"), tel("0", "412-555-1234"), tel("00", "58 412 555 1234")):
+        for numero in (tel("+5", "8 412 555 1234"), tel("0", "412-555-1234"), tel("005", "8 412 555 1234"),
+                       tel("wa.me/5", "84125551234")):
             with self.subTest(numero=numero):
                 self.preparar(f"Llama al {numero}\n")
                 self.assertEqual(self.comprobar("pre-commit").returncode, 1)
@@ -144,10 +145,25 @@ class PruebasComprobar(unittest.TestCase):
         self.preparar("const contactoZoilaFicticia = 1;\n")
         self.assertEqual(self.comprobar("pre-commit").returncode, 1)
 
-    def test_mensaje_tras_tijera_ignorado(self):
-        # Con commit -v, git pone el diff tras la tijera y lo quita del mensaje.
-        texto = f"Añade la base\n# {'-' * 24} >8 {'-' * 24}\n-Escribe a alguien{ARROBA}correo.com\n"
-        self.assertEqual(self.mensaje(texto).returncode, 0)
+    def test_mensaje_tras_tijera_tambien_se_revisa(self):
+        # Con -m, git conserva una línea de tijera y lo que la sigue.
+        texto = f"Añade la base\n# {'-' * 24} >8 {'-' * 24}\nEscribe a alguien{ARROBA}correo.com\n"
+        self.assertEqual(self.mensaje(texto).returncode, 1)
+
+    def test_correo_y_telefono_con_invisibles(self):
+        zwsp, shy = chr(0x200B), chr(0x00AD)
+        for texto in (f"alguien{zwsp}{ARROBA}correo.com", f"alguien{ARROBA}corr{shy}eo.com",
+                      tel("04", f"12{zwsp}555{zwsp}1234")):
+            with self.subTest(texto=texto):
+                self.preparar(f"Contacto: {texto}\n")
+                self.assertEqual(self.comprobar("pre-commit").returncode, 1)
+
+    def test_archivo_en_utf16(self):
+        for texto in ("Reunión con Zoila Ficticia", tel("Llama al 04", "12 555 1234")):
+            with self.subTest(texto=texto):
+                (self.repo / "b.txt").write_bytes(texto.encode("utf-16"))
+                self.git("add", "b.txt")
+                self.assertEqual(self.comprobar("pre-commit").returncode, 1)
 
     def test_submodulo_no_rompe(self):
         sub = self.repo / "sub"
@@ -194,9 +210,14 @@ class PruebasComprobar(unittest.TestCase):
         self.git("commit", "-qm", "Base")  # lo limpio pasa
         token = "ghp_" + secrets.token_hex(18)
         (self.repo / "a.txt").write_text(f'clave = "{token}"\n', encoding="utf-8")
-        for orden in (["commit", "-qam", "Con commit -a"],                    # índice temporal
-                      ["commit", "-q", "--allow-empty", "-m", f"Clave {token}"]):  # en el mensaje
-            with self.subTest(orden=orden[1]):
+        (self.repo / "u.txt").write_bytes(f'clave = "{token}"\n'.encode("utf-16"))
+        casos = (("commit -a", [], ["commit", "-qam", "Prueba"]),  # índice temporal
+                 ("mensaje", [], ["commit", "-q", "--allow-empty", "-m", f"Clave {token}"]),
+                 ("utf-16", ["add", "u.txt"], ["commit", "-qm", "Prueba"]))
+        for caso, antes, orden in casos:
+            with self.subTest(caso=caso):
+                if antes:
+                    self.git(*antes)
                 r = subprocess.run(["git", *orden], cwd=self.repo, capture_output=True, text=True)
                 self.assertNotEqual(r.returncode, 0)
                 self.assertIn("leaks found", r.stderr)
