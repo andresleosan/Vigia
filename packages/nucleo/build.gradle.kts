@@ -22,3 +22,10 @@ tasks.test {
     useJUnitPlatform()
     jvmArgs("-Dfile.encoding=UTF-8")
 }
+
+// Escribe ../shared/vectores/firmas-kotlin.json con una clave efímera (contrato, sección 18).
+tasks.register<JavaExec>("firmasKotlin") {
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("vigia.nucleo.FirmasKotlinKt")
+    args(file("../shared/vectores/firmas-kotlin.json").path)
+}
