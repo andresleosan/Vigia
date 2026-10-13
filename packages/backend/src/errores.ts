@@ -1,6 +1,7 @@
 import { codificarJcv, ESTADO_DE, type Codigo } from '@vigia/shared';
 
 export const TIPO_JSON = 'application/json';
+export const TIPO_SOBRE = 'application/vnd.vigia.sobre';
 
 // Rechazo de la lista cerrada (ERR-01): app.onError lo convierte en {"codigo":"…"}.
 export class Rechazo extends Error {

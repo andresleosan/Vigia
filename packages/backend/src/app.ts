@@ -4,7 +4,8 @@ import { alta } from './alta.ts';
 import type { Entorno } from './entorno.ts';
 import { Rechazo, respuestaError, TIPO_JSON } from './errores.ts';
 import { limite, tipoExacto } from './firma.ts';
-import { estado } from './lecturas.ts';
+import { abrir } from './incidentes.ts';
+import { estado, leerRegistro } from './lecturas.ts';
 
 export type Opciones = { ahora: () => number };
 
@@ -19,7 +20,9 @@ export function crearApp({ ahora }: Opciones) {
   });
 
   app.post('/v1/devices', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => alta(c, ahora()));
+  app.post('/v1/incidents', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => abrir(c, ahora()));
   app.get('/v1/incidents/:id', (c) => estado(c, ahora()));
+  app.get('/v1/incidents/:id/chunks/:seq', (c) => leerRegistro(c, ahora()));
 
   app.notFound(() => respuestaError('no_existe'));
   // Sin console y sin el texto de la excepción (ERR-01, LOG-01).

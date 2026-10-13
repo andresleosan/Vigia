@@ -1,8 +1,8 @@
-import { CABECERA, criptoWebCrypto, esId, PATRON_ID, VENTANA_HORA_MS, verificarPeticion } from '@vigia/shared';
+import { CABECERA, criptoWebCrypto, esId, PATRON_ID, resumenPeticion, VENTANA_HORA_MS, verificarPeticion } from '@vigia/shared';
 import type { MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { Contexto } from './entorno.ts';
-import { Rechazo, respuestaError } from './errores.ts';
+import { Rechazo, respuestaError, respuestaJson } from './errores.ts';
 
 export const cripto = criptoWebCrypto();
 
@@ -30,6 +30,12 @@ export function idDeRuta(c: Contexto): string {
   const id = c.req.param('id') ?? '';
   if (!esId(id)) throw new Rechazo('formato');
   return id;
+}
+
+export function seqDeRuta(c: Contexto, minimo: 0 | 1): number {
+  const seq = c.req.param('seq') ?? '';
+  if (!/^(0|[1-9][0-9]{0,5})$/.test(seq) || Number(seq) < minimo) throw new Rechazo('formato');
+  return Number(seq);
 }
 
 type Cabeceras = { dispositivo: string; hora: number; idPeticion: string; firma: string };
@@ -78,4 +84,19 @@ export async function comprobarFirma(c: Contexto, cuerpo: Uint8Array, ahora: num
   if (!valida || (d.revocado_en !== null && !admiteRevocado)) throw new Rechazo('firma');
   comprobarHora(cab.hora, ahora);
   return { id: cab.dispositivo, idPeticion: cab.idPeticion, spki: new Uint8Array(d.spki), revocado: d.revocado_en !== null, tamanoD1: meta.size_after };
+}
+
+// h de la fila anti-reenvío: sin HORA, para que el reintento tras un 401 hora sea la misma petición.
+export function resumen(c: Contexto, cuerpo: Uint8Array): Promise<string> {
+  return resumenPeticion(cripto, c.req.method, new URL(c.req.raw.url).pathname, cuerpo);
+}
+
+// Paso 4 (FIR-02): la misma petición recibe el estado y el cuerpo guardados, sin contar cupo;
+// otra con el mismo idPeticion, 409 sin ejecutar nada. null: no hay fila.
+export async function antirreenvio(c: Contexto, f: Firmante, h: string): Promise<Response | null> {
+  const fila = await c.env.DB.prepare('SELECT h, estado, cuerpo FROM antirreenvio WHERE dispositivo = ? AND id_peticion = ?')
+    .bind(f.id, f.idPeticion).first<{ h: string; estado: number; cuerpo: number[] }>();
+  if (!fila) return null;
+  if (fila.h !== h) throw new Rechazo('conflicto');
+  return respuestaJson(new Uint8Array(fila.cuerpo), fila.estado);
 }
