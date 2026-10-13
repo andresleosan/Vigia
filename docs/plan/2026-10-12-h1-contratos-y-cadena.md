@@ -404,7 +404,7 @@ Horas en los mensajes, en la zona de las opciones:
 - `{intervalo}`: `entre HH:MM y HH:MM del DD-MM-AAAA (UTC±hh:mm)` si es el mismo día; si no, `entre HH:MM del DD-MM-AAAA y HH:MM del DD-MM-AAAA (UTC±hh:mm)`. Si las dos horas tienen distinto desfase, va la forma larga y cada hora lleva su fecha y su desfase. El desfase usa `+` o `-` ASCII y las horas se truncan al minuto. Una hora fuera del rango de `Date` (el JCV admite hasta 2^53 − 1) se escribe igual, con aritmética de bloques de 400 años: el verificador nunca lanza por una hora.
 - Las horas del reloj del teléfono (el hueco) usan el mismo formato y el mensaje lo dice.
 - La bóveda puede abreviar a `HH:MM` cuando todo cae en el mismo día en la zona del contacto.
-- `{reg}` es `Registro {seq}`, `Apertura` o `Cierre`. `{huella}` son los 16 primeros caracteres de la huella.
+- `{reg}` es `Registro {seq}`, `Apertura` o `Cierre`. `{huella}` son los 16 primeros caracteres de la huella; en `sin_huella`, la huella entera, en 8 grupos de 8 (revisión final de H1).
 - Con n = 1, `ok` y `ok_incompleto` van en singular y con `{hora}` (la del fragmento): "✓ 1 fragmento, cadena íntegra, firmado por el dispositivo {huella}, recibido a las {hora}" y "✓ 1 fragmento firmado por el dispositivo {huella}, recibido a las {hora}; el paquete no está completo: mira los avisos".
 
 Mensajes (lista cerrada, en español). Un fallo impide el ✓ de su registro y el estado `integro`; un aviso se muestra con el resultado:
@@ -433,7 +433,7 @@ Mensajes (lista cerrada, en español). Un fallo impide el ✓ de su registro y e
 | `sin_acuse` | fallo | {reg}: sin acuse válido del servidor |
 | `acuse_no_fiable` | fallo | {reg}: el acuse lo firmó una clave del servidor marcada como comprometida |
 | `evento_invalido` | fallo | Evento {n}: no lo firmó el servidor o no es de este incidente |
-| `sin_huella` | aviso | Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala con la del enlace |
+| `sin_huella` | aviso | Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala entera con la del enlace |
 | `leeme_alterado` | aviso | LEEME.txt no es el texto oficial: no sigas sus instrucciones; usa docs/verificacion.md del repositorio público |
 | `falta` | aviso | Fragmento {seq}: no está en el paquete |
 | `faltan` | aviso | Fragmentos {seq} a {hasta}: no están en el paquete |

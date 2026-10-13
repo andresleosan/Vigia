@@ -45,7 +45,7 @@ export const TEXTOS: Readonly<Record<ClaveMensaje, string>> = {
   sin_acuse: '{reg}: sin acuse válido del servidor',
   acuse_no_fiable: '{reg}: el acuse lo firmó una clave del servidor marcada como comprometida',
   evento_invalido: 'Evento {n}: no lo firmó el servidor o no es de este incidente',
-  sin_huella: 'Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala con la del enlace',
+  sin_huella: 'Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala entera con la del enlace',
   leeme_alterado: 'LEEME.txt no es el texto oficial: no sigas sus instrucciones; usa docs/verificacion.md del repositorio público',
   falta: 'Fragmento {seq}: no está en el paquete',
   faltan: 'Fragmentos {seq} a {hasta}: no están en el paquete',
@@ -187,7 +187,8 @@ export async function verificarPaquete(cripto: Cripto, zip: Uint8Array, op: Opci
   if (!esSpkiP256(spki)) return parar('paquete_invalido');
   const huella = await calcularHuella(cripto, spki);
   if (op.huella !== undefined && op.huella !== huella) return parar('huella_distinta');
-  if (op.huella === undefined) generales.push(hallazgo('sin_huella', { huella: huella.slice(0, 16) }));
+  // Aquí va entera, en grupos de 8: 16 caracteres comparados a ojo son solo 64 bits (revisión final de H1).
+  if (op.huella === undefined) generales.push(hallazgo('sin_huella', { huella: huella.replace(/.{8}(?=.)/g, '$& ') }));
 
   // 4. Apertura: el origen de la cadena. Primero lo que firmó el teléfono y después el acuse, para que un acuse que
   // no vale (una lista de claves equivocada o una clave comprometida) nunca se lea como una apertura falsa.

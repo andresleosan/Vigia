@@ -5,7 +5,7 @@
  * La clave del incidente (K) o la privada de escucha llegan en b64u por la entrada estándar, nunca como argumento (ENV-01).
  * Sale con 0 si el paquete no tiene fallos, 1 si los tiene y 2 si la orden está mal escrita.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { openSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { hpkeCore, importarReceptora } from '../src/hpke-core.ts';
 import {
@@ -107,10 +107,21 @@ try {
 }
 const [claves, origen] = lista();
 const clave = o['clave-incidente'] || o['clave-escucha'] ? secreto() : undefined;
+// El audio sale en claro: solo lo lee su dueño (0600) y nunca pisa otro archivo.
+let audio: number | undefined;
+try {
+  audio = o.audio === undefined ? undefined : openSync(o.audio, 'wx', 0o600);
+} catch {
+  uso(`No se puede crear ${o.audio}: si ya existe, elige otro nombre.`);
+}
 const k = clave && o['clave-escucha'] ? await abrirEscucha(zip, clave) : clave;
 console.log(`Claves del acuse: ${origen}`);
 const informe = await verificarPaquete(criptoWebCrypto(), zip, { huella: o.huella, claves, k, zona: o.zona });
 console.log(informe.resumen);
 for (const h of informe.hallazgos) console.log(`- ${h.texto}`);
-if (o.audio !== undefined) writeFileSync(o.audio, Buffer.concat([...informe.audio].sort(([a], [b]) => a - b).map(([, audio]) => audio)));
+// eventos.txt no va firmado en conjunto: sin alerta ni revocación no hay marcas, y eso no prueba nada (docs/verificacion.md, paso 5).
+if ((informe.estado !== 'fallido' || informe.fragmentos > 0) && !informe.eventos.some((e) => e.evento === 'alerta' || e.evento === 'revocacion')) {
+  console.log('El paquete no trae eventos de alerta ni de revocación: quien lo arma puede quitarlos, así que eso no prueba que no los hubiera.');
+}
+if (audio !== undefined) writeFileSync(audio, Buffer.concat([...informe.audio].sort(([a], [b]) => a - b).map(([, datos]) => datos)));
 process.exitCode = informe.estado === 'fallido' ? 1 : 0;

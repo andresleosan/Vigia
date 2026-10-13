@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +24,8 @@ const claves = join(dir, 'claves.txt');
 writeFileSync(paquete, p.paquete(lista, { envolturas: [{ rol: 'escucha', k: envoltura }] }));
 writeFileSync(claves, unir(...p.claves.map((e) => unir(bytesEntradaClave(e), Uint8Array.of(0x0a)))));
 const ok = `✓ 3 fragmentos, cadena íntegra, firmados por el dispositivo ${p.huella.slice(0, 16)}, recibidos entre 10:01 y 10:03 del 12-10-2026 (UTC-04:00)`;
+// El paquete de prueba no trae eventos: el CLI recuerda que eso no prueba nada (revisión final de H1).
+const SIN_EVENTOS = 'El paquete no trae eventos de alerta ni de revocación: quien lo arma puede quitarlos, así que eso no prueba que no los hubiera.';
 
 function verificar(args: string[], entrada = '') {
   const r = spawnSync(process.execPath, [CLI, ...args], { input: entrada, encoding: 'utf8' });
@@ -31,24 +33,34 @@ function verificar(args: string[], entrada = '') {
 }
 
 describe('CLI verificar', () => {
-  it('con K por la entrada estándar: dice qué lista de claves usó, da el ✓ y escribe el audio', () => {
+  it('con K por la entrada estándar: dice qué lista de claves usó, da el ✓ y escribe el audio, legible solo por su dueño', () => {
     const audio = join(dir, 'audio.aac');
     const r = verificar([paquete, '--zona', 'America/Caracas', '--claves', claves, '--huella', p.huella, '--clave-incidente', '--audio', audio], `${b64u(p.k)}\n`);
-    expect(r).toMatchObject({ codigo: 0, salida: `Claves del acuse: ${claves}\n${ok}\n` });
+    expect(r).toMatchObject({ codigo: 0, salida: `Claves del acuse: ${claves}\n${ok}\n${SIN_EVENTOS}\n` });
     expect(readFileSync(audio)).toEqual(Buffer.concat(lista.slice(1, 4).map((e) => e.audio as Uint8Array)));
+    expect(statSync(audio).mode & 0o777).toBe(0o600); // audio en claro de la evidencia
+  });
+
+  it('--audio nunca pisa un archivo que ya existe: sale con 2 antes de verificar y lo deja como estaba', () => {
+    const audio = join(dir, 'ya-existe.aac');
+    writeFileSync(audio, 'previo');
+    const r = verificar([paquete, '--zona', 'America/Caracas', '--claves', claves, '--huella', p.huella, '--clave-incidente', '--audio', audio], `${b64u(p.k)}\n`);
+    expect([r.codigo, r.salida]).toEqual([2, '']);
+    expect(r.error).toContain('Uso:');
+    expect(readFileSync(audio, 'utf8')).toBe('previo');
   });
 
   it('con la privada de escucha por la entrada estándar: abre envolturas/escucha-1.json', () => {
     const r = verificar([paquete, '--zona', 'America/Caracas', '--claves', claves, '--huella', p.huella, '--clave-escucha'], b64u(escucha));
-    expect(r).toMatchObject({ codigo: 0, salida: `Claves del acuse: ${claves}\n${ok}\n` });
+    expect(r).toMatchObject({ codigo: 0, salida: `Claves del acuse: ${claves}\n${ok}\n${SIN_EVENTOS}\n` });
   });
 
   it('sin clave ni huella: los avisos, uno por línea', () => {
     const r = verificar([paquete, '--zona', 'America/Caracas', '--claves', claves]);
     expect(r.salida.split('\n')).toEqual([
       `Claves del acuse: ${claves}`, ok,
-      `- Aviso: la identidad del teléfono (${p.huella.slice(0, 16)}) la afirma el propio paquete; compárala con la del enlace`,
-      '- Audio sin comprobar: falta la clave para descifrar', '',
+      `- Aviso: la identidad del teléfono (${p.huella.match(/.{8}/g)?.join(' ')}) la afirma el propio paquete; compárala entera con la del enlace`,
+      '- Audio sin comprobar: falta la clave para descifrar', SIN_EVENTOS, '',
     ]);
   });
 

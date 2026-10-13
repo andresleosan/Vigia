@@ -10,6 +10,7 @@ import { cambiar, claves, cripto, INCIDENTE, MIN, nuevaPrueba, OTRO_INCIDENTE, T
 
 const p = await nuevaPrueba();
 const huella16 = p.huella.slice(0, 16);
+const huellaEntera = p.huella.match(/.{8}/g)?.join(' '); // sin_huella la muestra entera, en grupos de 8
 const valido = p.paquete(await p.cerrada(2));
 /** Por defecto, con la huella del enlace, la lista de prueba, la clave del incidente y la zona de Caracas. */
 const verificar = (zip: Uint8Array, op: Partial<OpcionesVerificacion> = {}) =>
@@ -71,7 +72,7 @@ describe('paquete auténtico', () => {
   it('sin la huella del enlace ni la clave: dos avisos, el mismo ✓ y ningún audio', async () => {
     const inf = await verificar(p.paquete(await p.cerrada(3)), { huella: undefined, k: undefined });
     expect(textos(inf)).toEqual([
-      `Aviso: la identidad del teléfono (${huella16}) la afirma el propio paquete; compárala con la del enlace`,
+      `Aviso: la identidad del teléfono (${huellaEntera}) la afirma el propio paquete; compárala entera con la del enlace`,
       'Audio sin comprobar: falta la clave para descifrar',
     ]);
     expect(inf.estado).toBe('integro');

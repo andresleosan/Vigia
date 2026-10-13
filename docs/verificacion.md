@@ -23,7 +23,7 @@ Para verificar hacen falta:
 
 - `id`: b64u de 16 bytes aleatorios, 22 caracteres con el patrón `^[A-Za-z0-9_-]{22}$`. Son cadenas opacas: nunca se decodifican.
 - Pública P-256 del teléfono: siempre la SPKI DER sin comprimir de exactamente 91 bytes, `3059301306072a8648ce3d020106082a8648ce3d03010703420004` ‖ X ‖ Y (32 bytes cada coordenada), con el punto en la curva. Otra longitud u otro prefijo: no es una pública válida. En b64u mide 122 caracteres.
-- `huella` del teléfono: `hex(SHA-256(SPKI de 91 bytes))`, 64 caracteres. Es el `d` del enlace del contacto; los mensajes muestran sus 16 primeros caracteres.
+- `huella` del teléfono: `hex(SHA-256(SPKI de 91 bytes))`, 64 caracteres. Es el `d` del enlace del contacto; los mensajes muestran sus 16 primeros caracteres, salvo `sin_huella`, que la muestra entera.
 - Pública X25519 (envolturas): los 32 bytes crudos de RFC 7748.
 
 ## 3. JSON canónico de Vigía (JCV)
@@ -249,9 +249,9 @@ Cada hallazgo es un **fallo** o un **aviso** (sección 13). Un fallo impide el �
 
 1. **ZIP.** Lectura estricta (sección 11). Si falla: `paquete_invalido`, y se para.
 2. **`LEEME.txt`.** Si falta o su SHA-256 no es el de la sección 11: `leeme_alterado`.
-3. **Incidente e identidad.** `incidente.json` debe ser el JCV de la sección 11 y su `spki`, una pública P-256 de 91 bytes (sección 2); si no, `paquete_invalido`, y se para. La huella es `hex(SHA-256(spki))`. Con `d`: si es distinta, `huella_distinta`, y se para. Sin `d`: `sin_huella`.
+3. **Incidente e identidad.** `incidente.json` debe ser el JCV de la sección 11 y su `spki`, una pública P-256 de 91 bytes (sección 2); si no, `paquete_invalido`, y se para. La huella es `hex(SHA-256(spki))`. Con `d`: si es distinta, `huella_distinta`, y se para. Sin `d`: `sin_huella`, con la huella entera, porque compararla a ojo solo vale con sus 64 caracteres (16 son 64 bits, al alcance de un Estado); lo seguro es pasar `d` al verificador.
 4. **Apertura.** Deben estar `registros/000000.r` y `registros/000000.s`; el JCV debe ser una apertura (`seq` 0) del `incidente` del paquete, con `dispositivo` igual a la huella, y su firma debe verificar con `vigia/v1/registro`. Si no: `apertura_invalida`, y se para. Después, `acuses/000000.json` debe estar y ser un acuse válido de la apertura (sección 7); si no, `acuse_no_fiable` (su `r` es el esperado y su firma verifica con una clave `comprometida`) o `sin_acuse` (cualquier otro caso, también si falta), con `{reg}` = `Apertura`, y se para. Así un acuse que no vale (una lista de claves equivocada o una clave comprometida) nunca se presenta como una apertura que el teléfono no firmó. Con `K`: si `kc` no coincide, `clave_incorrecta`, y se sigue como si no hubiera `K` (no se descifra nada).
-5. **Eventos.** Cada línea de `eventos.txt` (JCV ‖ 0x0A; un trozo final sin 0x0A es una línea que no vale) debe ser un evento válido (sección 8) con `dispositivo` igual a la huella e `incidente` igual al del paquete o `-`. Si no: `evento_invalido` con su número de línea (desde 1), y no cuenta. `T_alerta` es la menor `hora_servidor` de los eventos `alerta` válidos, y `T_rev`, la de los `revocacion` válidos. El orden de las líneas no se comprueba: cada línea vale por sí misma.
+5. **Eventos.** Cada línea de `eventos.txt` (JCV ‖ 0x0A; un trozo final sin 0x0A es una línea que no vale) debe ser un evento válido (sección 8) con `dispositivo` igual a la huella e `incidente` igual al del paquete o `-`. Si no: `evento_invalido` con su número de línea (desde 1), y no cuenta. `T_alerta` es la menor `hora_servidor` de los eventos `alerta` válidos, y `T_rev`, la de los `revocacion` válidos. El orden de las líneas no se comprueba: cada línea vale por sí misma. `eventos.txt` no va firmado en conjunto: quien arma el paquete puede quitar líneas, y sin un evento no hay marca (paso 9). Un paquete sin alerta ni revocación no prueba que no las hubiera; el verificador de referencia lo recuerda al final (sección 15).
 6. **Registros de `seq` 1 a M**, con M el mayor entre el `ultimo_seq` de `registros/cierre.r` (si su JCV se analiza como un cierre) y el mayor `seq` presente. Para cada `seq`:
    - Si no está presente: `falta`. Los que faltan seguidos forman un solo hallazgo, `faltan`, del primero al último del tramo.
    - Si está presente, se aplican estas comprobaciones en orden y solo se informa de la primera que falla:
@@ -283,7 +283,7 @@ Cada hallazgo es un **fallo** o un **aviso** (sección 13). Un fallo impide el �
 
 ## 13. Mensajes
 
-Lista cerrada, en español. `{reg}` es `Registro {seq}`, `Apertura` o `Cierre`, según de qué registro es el hallazgo. `{huella}` son los 16 primeros caracteres de la huella. `{n}` es un número de fragmentos o, en `evento_invalido`, el número de línea; `{f}`, el número de fallos; `{archivo}`, la ruta dentro del paquete. `{motivo}`: `microfono` se escribe "otra app usó el micrófono" e `interrupcion`, "la grabación se interrumpió".
+Lista cerrada, en español. `{reg}` es `Registro {seq}`, `Apertura` o `Cierre`, según de qué registro es el hallazgo. `{huella}` son los 16 primeros caracteres de la huella; en `sin_huella`, la huella entera, en 8 grupos de 8 caracteres separados por espacios. `{n}` es un número de fragmentos o, en `evento_invalido`, el número de línea; `{f}`, el número de fallos; `{archivo}`, la ruta dentro del paquete. `{motivo}`: `microfono` se escribe "otra app usó el micrófono" e `interrupcion`, "la grabación se interrumpió".
 
 Con un solo fragmento que cuenta (n = 1), `ok` y `ok_incompleto` van en singular y con `{hora}`, la del acuse de ese fragmento: "✓ 1 fragmento, cadena íntegra, firmado por el dispositivo {huella}, recibido a las {hora}" y "✓ 1 fragmento firmado por el dispositivo {huella}, recibido a las {hora}; el paquete no está completo: mira los avisos".
 
@@ -311,7 +311,7 @@ Con un solo fragmento que cuenta (n = 1), `ok` y `ok_incompleto` van en singular
 | `sin_acuse` | fallo | {reg}: sin acuse válido del servidor |
 | `acuse_no_fiable` | fallo | {reg}: el acuse lo firmó una clave del servidor marcada como comprometida |
 | `evento_invalido` | fallo | Evento {n}: no lo firmó el servidor o no es de este incidente |
-| `sin_huella` | aviso | Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala con la del enlace |
+| `sin_huella` | aviso | Aviso: la identidad del teléfono ({huella}) la afirma el propio paquete; compárala entera con la del enlace |
 | `leeme_alterado` | aviso | LEEME.txt no es el texto oficial: no sigas sus instrucciones; usa docs/verificacion.md del repositorio público |
 | `falta` | aviso | Fragmento {seq}: no está en el paquete |
 | `faltan` | aviso | Fragmentos {seq} a {hasta}: no están en el paquete |
@@ -344,5 +344,6 @@ pnpm --filter @vigia/shared verificar <paquete.zip> --zona America/Caracas --cla
 
 - `--claves <archivo>` toma la lista fijada de un archivo (sección 7); `--entorno produccion`, la compilada en el verificador. El verificador dice cuál usó.
 - `--clave-incidente` lee `K` en b64u de la entrada estándar; `--clave-escucha` lee la privada X25519 de escucha (32 bytes en b64u) y abre con ella `envolturas/escucha-<n>.json`. Una clave nunca va como argumento de la orden, para que no quede en el historial ni en la lista de procesos.
-- `--audio <archivo>` guarda el audio de los fragmentos que cuentan, en orden de `seq`.
+- `--audio <archivo>` guarda el audio de los fragmentos que cuentan, en orden de `seq`. Es audio en claro: el archivo se crea con permisos 0600 (solo lo lee su dueño) y nunca pisa uno que ya exista.
+- Si el paquete no trae eventos de alerta ni de revocación, lo recuerda en una línea al final: eso no prueba que no los hubiera (sección 12, paso 5).
 - Sale con 0 si el paquete no tiene fallos, con 1 si los tiene y con 2 si la orden está mal escrita.
