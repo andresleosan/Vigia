@@ -13,3 +13,4 @@ export * from './contratos.ts';
 export * from './peticion.ts';
 export * from './acuse.ts';
 export * from './evento.ts';
+export * from './paquete.ts';
