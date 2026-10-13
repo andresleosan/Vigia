@@ -2,3 +2,4 @@
 export * from './codificacion.ts';
 export * from './cripto.ts';
 export * from './ids.ts';
+export * from './jcv.ts';
