@@ -3,6 +3,9 @@ package vigia.nucleo
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.spec.ECGenParameterSpec
 
 /** 12-10-2026 12:00:00 UTC, en ms: la hora de las pruebas propias. */
 const val HORA = 1791806400000L
@@ -45,3 +48,6 @@ fun registroDe(jcv: String): Registro {
         else -> throw ErrorFormato("tipo desconocido en el vector")
     }
 }
+
+/** Un par P-256 nuevo en cada prueba: ninguna clave privada se guarda. */
+fun parP256(): KeyPair = KeyPairGenerator.getInstance("EC").apply { initialize(ECGenParameterSpec("secp256r1")) }.generateKeyPair()
