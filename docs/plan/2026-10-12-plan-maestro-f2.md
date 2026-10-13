@@ -38,7 +38,7 @@
 - Grabar y consultar derechos funcionan 100 % sin red ni backend, también en una instalación que nunca tuvo red.
 - Audio: AAC-LC mono a 16 kHz, unos 32 kbps (unos 14 MB por hora); fragmentos ADTS de 2 a 8 s; se parte de 4 s y el pico técnico fija el valor.
 - Sobre en RAM:
-  - `p = SHA-256(audio)`;
+  - `p = HMAC-SHA-256(Kp, audio)`, con `Kp = HKDF-SHA256(K, sal de 32 bytes a 0, "vigia/v1/p")` (decisión 67 de DESIGN.md);
   - `ct = AES-256-GCM(K, nonce aleatorio de 96 bits, aad = "vigia/v1" ‖ tipo ‖ incidente ‖ seq)`, con la misma codificación para `loc` y los metadatos;
   - `r = {v, incidente, seq, hora_teléfono, p, c = SHA-256(ct), loc, prev = SHA-256(r_anterior)}`, con bytes canónicos;
   - `s = firma_dispositivo(r)`, con un prefijo de dominio propio.
@@ -194,7 +194,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
   - Hooks de pre-commit y commit-msg con gitleaks de versión fijada (ver "Cómo trabajamos"), y la lista privada de patrones con los nombres del registro privado.
   - `sitio/`: página de presentación mínima y estática, en español, con el nombre Vigía, qué es y el aviso de prototipo. No enlaza al repo mientras esté en una cuenta personal, porque mostraría la cuenta del titular. Sin descarga hasta el primer release, sin terceros ni analítica, con `_headers` (CSP solo `self`, `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy: no-referrer`) y sin ningún host operativo. Sigue los tokens de DESIGN.md.
   - Banco de pruebas en un repositorio local aparte, sin remoto: app Expo mínima con un módulo Kotlin y op-sqlite (sqlcipher y fts5), y la página de primitivas.
-  - P1 en la máquina de build, P5 en la JVM y en Node, y P6 en Playwright. La versión de Playwright queda fijada en el informe, y H1 la copia al `package.json`.
+  - P1 en la máquina de build, P5 en la JVM y en Node, y P6 en Playwright. La versión de Playwright queda fijada en el informe, y H4, el primer hito que usa Playwright en el monorepo, la copia al `package.json`.
 - **Excluye:** teléfono, Cloudflare y VE (H0b); código de producto (H1).
 - **Criterios de aceptación:**
   - Desde el entorno de build, leer fuera de su árbol de trabajo y controlar el host fallan; `javac -version` y `jlink --version` responden.
@@ -290,9 +290,9 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
   - shared recibe un proveedor criptográfico inyectado (SHA-256, ECDSA P-256, AES-GCM y HPKE): WebCrypto en el Worker, en la bóveda y en Node, y en la app lo que fije el pico.
   - shared, verificador: mensajes legibles y formato ZIP del paquete, fijados aquí para no cambiarlos después.
   - Núcleo Kotlin: escritor y cortador ADTS, sobre en RAM con una interfaz de firmante (en Android, el Keystore), sellado HPKE con la librería provisional del pico y cola de subida con reloj virtual. Vectores dorados compartidos con TS. La tasa de muestreo, la duración del fragmento y el límite de cuerpo son parámetros hasta cerrar H0b.
-  - Worker, firma de peticiones: cadena canónica; ventana de ±5 min con la respuesta `hora` para corregir el desfase; idPeticion único por dispositivo, con las filas borradas a los 10 min.
+  - Worker, firma de peticiones: cadena canónica; ventana de ±5 min con la respuesta `hora` para corregir el desfase; idPeticion único por dispositivo, con las filas borradas pasados 10 min, en la limpieza de cada minuto: una fila vive como mucho 11 min.
   - Worker, alta de dispositivos:
-    - prueba de posesión;
+    - prueba de posesión: la petición del alta va firmada con la clave del dispositivo cuya pública registra; la pública de lectura entra en la misma alta sin prueba propia (decisión 70 de DESIGN.md);
     - tope global de altas por hora, sin IP, con la cota de crecimiento de R2 calculada (altas por hora × 24 × 30 × cuota por dispositivo) y cuotas que la mantengan pagable;
     - si hace falta una prueba de trabajo en el alta, se decide en el plan detallado de H1 con esa cota.
   - Worker, ingesta:
@@ -302,7 +302,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
     - con el cierre guardado, un `seq` mayor que el suyo responde 409, y los menores deben encadenar con su hash final, aunque el cierre llegue antes;
     - un PUT repetido no cambia la hora de recepción ni las marcas, y nunca cuenta como señal si no lleva firma de petición;
     - el límite por dispositivo cuenta solo los fragmentos nuevos, después de verificar `s`, con cupos separados para órdenes, subida y lecturas.
-  - Worker, lecturas firmadas del dispositivo: contrato de `GET /v1/incidents/:id/chunks/:seq`, firmada con la clave de lectura (el Worker rechaza las lecturas firmadas con la clave de los fragmentos), y de su versión firmada con la clave de recuperación (la usan H3b y H6).
+  - Worker, lecturas firmadas del dispositivo: `GET /v1/incidents/:id`, `GET /v1/incidents/:id/chunks/:seq` y `GET /v1/incidents/:id/close`, firmadas con la clave de lectura (el Worker rechaza las lecturas firmadas con la clave de los fragmentos); las usa H3b. La lectura firmada con la clave de recuperación pasa a H6, que fija su contrato.
   - Worker, operación:
     - límites por dispositivo con el binding de rate limiting (clave = id del dispositivo);
     - errores con una lista cerrada de códigos;
@@ -326,7 +326,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
     - reloj desfasado 6 min: 401 `hora`, y el reintento corregido pasa;
     - 64 KB + 1: 413, también sin Content-Length.
   - Fuera de orden: el `seq` 7 llega antes que el 6 y se aceptan los dos; si el 7 no encadena con el 6, queda marcado como bifurcación y el verificador lo dice.
-  - Reintento legítimo: el mismo PUT repetido devuelve el mismo acuse y deja un solo objeto. Un reenvío dentro de la ventana devuelve el resultado original, y la tabla anti-reenvío no conserva filas de más de 10 min.
+  - Reintento legítimo: el mismo PUT repetido devuelve el mismo acuse y deja un solo objeto. Un reenvío dentro de la ventana devuelve el resultado original, y la tabla anti-reenvío no conserva filas de más de 11 min: se borran pasados 10 min, en la limpieza de cada minuto.
   - Con el cierre guardado, un `seq` mayor responde 409; reenviar 100 veces los sobres de un paquete no cambia ninguna hora de recepción ni le provoca un 429 al teléfono simulado; una lectura firmada con la clave de los fragmentos se rechaza.
   - Altas: el informe anota la cota, su coste mensual y las cuotas elegidas; por encima del tope, el teléfono simulado recibe 429 y reintenta sin perder sobres.
   - El teléfono simulado acumula 2 min sin red (30 fragmentos de 4 s) contra el Worker local y luego los sube. `pnpm --filter shared verificar` imprime "✓ 30 fragmentos, cadena íntegra…" y `ffprobe` reconoce el audio descifrado.
@@ -343,7 +343,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
 - **Requisitos:** aprobar el formato canónico y la especificación de verificación, porque cambiarlos después obliga a tocar Kotlin, TS y el navegador.
 - **Riesgos:**
   - Una serialización ambigua rompería la interoperabilidad: la cubren los vectores byte a byte.
-  - El plan Free da 10 ms de CPU por petición: se mide la verificación ECDSA en local y se anota en H3a; si se acerca al límite, Workers Paid.
+  - El plan Free da 10 ms de CPU por petición: la verificación ECDSA se mide en H3a, con el Worker desplegado, que es donde se aplica el límite de CPU; si se acerca al límite, Workers Paid.
   - D1 no tiene transacciones interactivas: se usan batch y restricciones únicas.
 - **Skills:** superpowers:test-driven-development, cloudflare:workers-best-practices, cloudflare:wrangler, security-best-practices, ponytail:ponytail, antislop-code, superpowers:verification-before-completion.
 
@@ -797,7 +797,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
     De él salen, con HKDF-SHA256 y sal e info fijas, las claves X25519 y Ed25519. `K` también se envuelve para la recuperación. El servidor guarda la pública Ed25519, y cambiarla exige la firma de la vigente.
 
     Salvaguardas: con una alerta activa, el teléfono no puede crear ni cambiar la clave de recuperación; una clave creada después de la configuración inicial no tiene poderes durante 72 h, y M1 lo muestra todo ese tiempo ("Código de recuperación nuevo: se activa el DD-MM. Si no lo creaste tú, anúlalo con tu PIN"); una orden de recuperación que reduce la protección no vale sobre una alerta que empezó antes de que esa clave tuviera poderes. Al activarlo en modo base, el teléfono envuelve también las `K` que conserva, para que cubra lo ya grabado.
-  - Worker: `GET /v1/recovery/incidents`, lectura de fragmentos firmada con la clave de recuperación, `POST /v1/recovery/ok` y `POST /v1/recovery/revoke`, firmadas con prefijo propio.
+  - Worker: `GET /v1/recovery/incidents`, lectura de fragmentos firmada con la clave de recuperación (su contrato se fija en este hito; antes estaba en H1), `POST /v1/recovery/ok` y `POST /v1/recovery/revoke`, firmadas con prefijo propio.
   - Teléfono revocado (decisión de F1 10.4): sus órdenes, sus lecturas firmadas y sus aperturas nuevas reciben la misma respuesta que una firma inválida; sus peticiones nunca cuentan como señal, y su aviso por falta de señales termina con una línea en la cronología. Solo se aceptan fragmentos y cierre de incidentes cuya apertura tuvo acuse antes de la revocación, marcados "recibido después de la revocación" por la hora de recepción. Se declara que aceptarlos le revela la revocación a quien tiene el teléfono.
   - "Tengo un código de recuperación" en la primera pantalla y "Abrir con código" en M8. En modo avanzado, al cerrar el incidente el teléfono olvida la envoltura local.
 - **Excluye:** borrados con el código (H7); configuración inicial completa (H8a); ocultar la app ante un análisis forense (decisión 12).
@@ -1138,7 +1138,7 @@ Vienen de dos revisiones (servidor y criptografía; cliente, app y bóveda) y de
 | FIR-01 | Firma de peticiones | Cadena canónica versionada con prefijo, método, ruta sin query, hora, idPeticion, idDispositivo y SHA-256 del cuerpo crudo; firma P1363 | Vectores idénticos en JS y JVM; cambiar cuerpo, ruta, método o añadir query da 401 | H1 |
 | FIR-02 | Anti-reenvío | idPeticion firmado; UNIQUE(dispositivo, idPeticion); un duplicado devuelve el resultado original; idempotencia por estado en las órdenes (el plazo que vio la app y el idPeticion de la última orden aplicada) | "extender" reenviado, también a los 20 min, deja el mismo plazo; un SOS cancelado reenviado no crea alerta | H1, H5a, H7 |
 | FIR-03 | Desfase de reloj | 401 `hora` con cabecera Date; el teléfono corrige su desfase sin tocar `hora_teléfono` | Reloj +2 h: 401 y luego 200; `r` conserva su hora | H1, H3a |
-| FIR-04 | Alta y revocación | Prueba de posesión; pública P-256 válida y única; id generado por el servidor; un teléfono revocado recibe en sus órdenes, lecturas y aperturas nuevas la misma respuesta que una firma inválida y nunca cuenta como señal; solo se aceptan fragmentos y cierre de incidentes con apertura acusada antes de la revocación, marcados "recibido después de la revocación" | Alta firmada con otra clave: 401; respuesta idéntica byte a byte; sobre posterior marcado; apertura con hora anterior rechazada | H1, H6 |
+| FIR-04 | Alta y revocación | Prueba de posesión (la petición del alta, firmada con la clave del dispositivo cuya pública registra); pública P-256 válida y única; id generado por el servidor; un teléfono revocado recibe en sus órdenes, lecturas y aperturas nuevas la misma respuesta que una firma inválida y nunca cuenta como señal; solo se aceptan fragmentos y cierre de incidentes con apertura acusada antes de la revocación, marcados "recibido después de la revocación" | Alta firmada con otra clave: 401; respuesta idéntica byte a byte; sobre posterior marcado; apertura con hora anterior rechazada | H1, H6 |
 | ENT-01 | Validación de entrada | Esquemas estrictos de shared; ids `^[A-Za-z0-9_-]{22}$`; `seq` canónico; Content-Type obligatorio; `r` sin claves duplicadas | Casos 400, 415 y 404 por ruta | H1 |
 | ENT-02 | Tamaños y orden | bodyLimit por grupo de rutas (64 KB por fragmento, recalculado tras el pico); la URL coincide con el registro; `c = SHA-256(ct)`; fuera de orden aceptado, con `prev` comprobado cuando existe el anterior y la bifurcación marcada; con el cierre guardado, un `seq` mayor da 409; un PUT repetido no cambia la hora de recepción | 64 KB + 1 da 413, también sin Content-Length; `seq` 7 antes que 6, ambos aceptados; 100 reenvíos no cambian ninguna hora | H1 |
 | ID-01 | Identificadores | 128 bits de CSPRNG en base64url; solo hashes de `accessId` y tokens | 10.000 ids sin repetirse; ningún id numérico salvo `seq` | H1, H4 |
@@ -1146,7 +1146,7 @@ Vienen de dos revisiones (servidor y criptografía; cliente, app y bóveda) y de
 | COA-01 | Órdenes con alerta activa | El teléfono no puede revocar contactos, cambiar canales, apagar ni pausar la falta de señales, programar borrados ni crear o cambiar la clave de recuperación; la recuperación sí, si su clave ya tenía poderes cuando empezó la alerta | Con SOS activo: 409; con firma de recuperación: 200 | H5a, H6, H7 |
 | ERR-01 | Errores | Lista cerrada de códigos, sin pilas ni SQL; desconocido, firma inválida y revocado responden igual; ajeno e inexistente, el mismo 404 | Excepción: `{codigo: 'interno'}`; ninguna respuesta contiene SQLITE ni nombres de tablas | H1, H6 |
 | LOG-01 | Logs | `observability` y trazas desactivadas; logs sin ids ni URL; nunca leer cabeceras de IP ni `request.cf`; registro de accesos sin IP | grep vacío; espía de console; el marcador no aparece en Workers Logs ni en las métricas | H0b, H1, H8b |
-| PRIV-01 | Lo que guarda el servidor | Hora de la última señal solo con el aviso por falta de señales activo, borrada al apagarlo, y fecha de fin de la pausa; filas anti-reenvío borradas a los 10 min; solo cuenta como señal una petición con firma de petición de un teléfono no revocado | Reloj falso: 10 peticiones con el aviso apagado no dejan hora; ninguna fila anti-reenvío de más de 10 min | H1, H7 |
+| PRIV-01 | Lo que guarda el servidor | Hora de la última señal solo con el aviso por falta de señales activo, borrada al apagarlo, y fecha de fin de la pausa; filas anti-reenvío borradas pasados 10 min, en la limpieza de cada minuto (como mucho 11 min); solo cuenta como señal una petición con firma de petición de un teléfono no revocado | Reloj falso: 10 peticiones con el aviso apagado no dejan hora; ninguna fila anti-reenvío de más de 11 min | H1, H7 |
 | D1-01 | Consultas | Solo `prepare` con SQL constante y `bind`; sin `exec` con datos; migraciones versionadas | grep de plantillas y `exec`; una inyección devuelve 0 filas | H1 |
 | D1-02 | Esquema | PK(incidente, seq); UNIQUE de alertas, entregas, órdenes y hashes; CHECK; sin réplicas de lectura para el temporizador y la autorización | `sqlite_master` las muestra; insertar duplicados falla | H1, H5a |
 | CRON-01 | Cron | Transiciones condicionales en batch; tabla de entregas con reintentos; la cancelación solo a quien recibió la alerta; borrado por estados (programado, borrando, borrado) y nunca con una alerta activa; consultas con índice; sin ruta HTTP del cron en producción | 2 cron dan 1 alerta; 200 carreras; fallo de Telegram reintentado; `EXPLAIN QUERY PLAN` con índice; `/__scheduled` da 404 | H5a, H7, H8b |
@@ -1243,7 +1243,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 15. **Unidad de la cola de subida:** pasa de TypeScript a Kotlin, dentro del servicio, como una sola cola para todo lo firmado con prioridad fija (apertura; SOS y cancelación; desarme y extensión; cierre; latido; fragmentos); tras Detener, el servicio sigue hasta vaciarla; WorkManager de respaldo y pruebas JUnit con reloj virtual; JS solo lee el estado. Motivo: el hilo JS puede pausarse con la pantalla apagada y tras Detener, y entonces la evidencia no saldría antes de que quiten el teléfono.
 16. **M10:** sale el ajuste "datos móviles" en F2.
 17. **Plataforma Cloudflare:** la cuenta de la persona responsable (decisión 4); `observability` y trazas desactivadas; sin Logpush ni analítica; Workers Paid antes del piloto; tope global de altas con su cota (LOG-01, BOV-14C, OPS-01 y OPS-02).
-18. **Lo que guarda el servidor:** la hora de la última señal solo con el aviso por falta de señales activo, y las filas anti-reenvío se borran a los 10 min (PRIV-01).
+18. **Lo que guarda el servidor:** la hora de la última señal solo con el aviso por falta de señales activo, y las filas anti-reenvío se borran pasados 10 min, en la limpieza de cada minuto: una fila vive como mucho 11 min (PRIV-01).
 19. **"Qué sale de tu teléfono":** fila de la operadora, que ve a qué dominio te conectas (SNI); para los contactos, que Web Push pasa por Google, Apple o Mozilla.
 20. **Retención (Riesgos abiertos):** ningún borrado automático de incidentes de teléfonos inactivos en la v1 ni en el piloto; se revisa con los datos del piloto y con un custodio legal antes del lanzamiento público.
 21. **Variantes de prueba (VAR-01 y DAT-01):** debug y pruebas envuelven `K` también para la clave de escucha de pruebas (fuera del repo, destruida al cerrar F2) y admiten el interruptor `capturas` sin `FLAG_SECURE`; pruebas compila con packs en borrador y muestra la banda. Solo van a teléfonos de prueba con grabaciones sin terceros y nunca sirven para protegerse. Release no lleva nada de eso, y "Quién ve qué", la envoltura y el Do de `FLAG_SECURE` describen release.
