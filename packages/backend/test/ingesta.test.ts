@@ -232,7 +232,7 @@ describe('PUT /v1/incidents/:id/chunks/:seq (sección 11, "Ingesta del PUT")', (
     expect([await filas(inc), (await objetos(inc)).length, await n('SELECT bytes_usados AS n FROM dispositivos WHERE id = ?', a.id)]).toEqual([2, 2, 32_768]);
   });
 
-  it('dos PUT nuevos a la vez con cuota para uno: el batch que llega después da 429 cuota y no escribe nada, tampoco contadores (punto 9)', async () => {
+  it('dos PUT nuevos a la vez con cuota para uno: el batch que llega después da 429 cuota, sin fila ni contadores, y su objeto en R2 se cobra en la cuota (punto 9, OPS-02)', async () => {
     const { a, inc } = await conIncidente();
     const f = await cadena(a, inc, 2);
     const uno = { ...env, CUOTA_BYTES: String(16_384) };
@@ -245,10 +245,10 @@ describe('PUT /v1/incidents/:id/chunks/:seq (sección 11, "Ingesta del PUT")', (
     const r = await primero;
     expect([r.status, await r.text()]).toEqual([429, '{"codigo":"cuota"}']);
     const bytes = await n('SELECT bytes_usados AS n FROM dispositivos WHERE id = ?', a.id);
-    expect([await filas(inc), bytes, await contadores()]).toEqual([1, 16_384, antes + 1]); // solo el acuse del segundo
+    expect([await filas(inc), (await objetos(inc)).length, bytes, await contadores()]).toEqual([1, 2, 2 * 16_384, antes + 1]); // solo el acuse del segundo
   });
 
-  it('el cierre se guarda mientras el PUT de seq 3 espera su batch: 409 conflicto, ninguna fila de seq 3 y los contadores sin cambiar (punto 9)', async () => {
+  it('el cierre se guarda mientras el PUT de seq 3 espera su batch: 409 conflicto, ninguna fila de seq 3, los contadores sin cambiar y su objeto en R2 cobrado en la cuota (punto 9, OPS-02)', async () => {
     const { a, inc } = await conIncidente();
     const f = await cadena(a, inc, 3);
     for (const seq of [1, 2]) expect((await subir(a, inc, seq, f[seq - 1])).status).toBe(201);
@@ -261,6 +261,21 @@ describe('PUT /v1/incidents/:id/chunks/:seq (sección 11, "Ingesta del PUT")', (
     const r = await put;
     expect([r.status, await r.text()]).toEqual([409, '{"codigo":"conflicto"}']);
     expect([await n('SELECT count(*) AS n FROM fragmentos WHERE incidente = ? AND seq = 3', inc.id), await contadores()]).toEqual([0, antes]);
+    expect([(await objetos(inc)).length, await n('SELECT bytes_usados AS n FROM dispositivos WHERE id = ?', a.id)]).toEqual([3, 3 * 16_384]);
+  });
+
+  it('otro contenido gana el seq mientras el PUT espera su batch: 409 conflicto y los dos objetos que quedan en R2 se cobran en la cuota (OPS-02)', async () => {
+    const { a, inc } = await conIncidente();
+    const uno = await nuevoFragmento(a, inc, 1, inc.apertura.hash);
+    const otro = await nuevoFragmento(a, inc, 1, inc.apertura.hash, new TextEncoder().encode('otro audio'));
+    const puerta = d1ConPuerta(env.DB);
+    const primero = subir(a, inc, 1, uno, { entorno: { ...env, DB: puerta.db } });
+    await Promise.race([puerta.enBatch, primero]); // el primero ya escribió su objeto en R2
+    expect((await subir(a, inc, 1, otro)).status).toBe(201);
+    puerta.abrirPuerta();
+    const r = await primero;
+    expect([r.status, await r.text()]).toEqual([409, '{"codigo":"conflicto"}']);
+    expect([await filas(inc), (await objetos(inc)).length, await n('SELECT bytes_usados AS n FROM dispositivos WHERE id = ?', a.id)]).toEqual([1, 2, 2 * 16_384]);
   });
 
   it('guarda de D1: 429 cuota para un registro nuevo; la repetición sigue dando 200', async () => {

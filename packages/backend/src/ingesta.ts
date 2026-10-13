@@ -97,19 +97,24 @@ export async function ingerir(c: Contexto, ahora: number): Promise<Response> {
   ];
 
   let insertado: boolean;
+  let ganador: Estado | undefined;
   try {
     insertado = (await db.batch(sentencias))[0].meta.changes === 1;
   } catch (error) {
-    // Choque con la PK o con UNIQUE(r_hash): otro PUT igual ganó (punto 3). Si no, 500 y D1 sin cambios.
-    const { results: [ganador] } = await leerEstado(c, id, seq);
-    if (ganador?.r_hash) return repetido(ganador, rHash);
-    throw error;
+    // Choque con la PK o con UNIQUE(r_hash): otro PUT ganó (punto 3). Si no, 500 y D1 sin cambios.
+    ({ results: [ganador] } = await leerEstado(c, id, seq));
+    if (!ganador?.r_hash) throw error;
+    insertado = false;
   }
-  if (!insertado) {
-    const { results: [releido] } = await leerEstado(c, id, seq);
-    if (releido.r_hash !== null) return repetido(releido, rHash);
-    if (releido.ultimo_seq !== null && releido.ultimo_seq < seq) throw new Rechazo('conflicto');
-    throw new Rechazo('cuota');
+  if (insertado) return respuestaJson(acuse, 201);
+  const releido = ganador ?? (await leerEstado(c, id, seq)).results[0];
+  // Carrera perdida: el objeto que este PUT escribió en R2 no lo cobra ninguna fila, así que se cobra
+  // aquí (OPS-02). ponytail: la lectura previa es anterior a la carrera; una ráfaga en vuelo al llegar
+  // al tope puede pasarse una vez; reservar antes del put si eso llega a importar.
+  if (r.tipo === 'fragmento' && !reutilizado && releido.r_hash !== rHash) {
+    await db.prepare('UPDATE dispositivos SET bytes_usados = bytes_usados + ?1 WHERE id = ?2').bind(coste, e.dueno).run();
   }
-  return respuestaJson(acuse, 201);
+  if (releido.r_hash !== null) return repetido(releido, rHash);
+  if (releido.ultimo_seq !== null && releido.ultimo_seq < seq) throw new Rechazo('conflicto');
+  throw new Rechazo('cuota');
 }
