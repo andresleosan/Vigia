@@ -8,3 +8,5 @@ export * from './ids.ts';
 export * from './jcv.ts';
 export * from './prefijos.ts';
 export * from './registros.ts';
+export * from './sobre.ts';
+export * from './contratos.ts';
