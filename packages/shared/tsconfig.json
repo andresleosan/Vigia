@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["node"] },
+  "compilerOptions": { "types": ["node"], "skipLibCheck": true },
   "include": ["src", "test", "herramientas", "vitest.config.ts"]
 }
