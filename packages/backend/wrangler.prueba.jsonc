@@ -1,0 +1,22 @@
+{
+  "name": "api-prueba",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": false, "logs": { "enabled": false, "invocation_logs": false }, "traces": { "enabled": false } },
+  "preview_urls": false,
+  "triggers": { "crons": ["* * * * *"] },
+  "d1_databases": [{ "binding": "DB", "database_name": "datos-prueba", "database_id": "00000000-0000-4000-8000-000000000000", "migrations_dir": "migraciones" }],
+  "r2_buckets": [{ "binding": "EVIDENCIA", "bucket_name": "evidencia-prueba" }],
+  "ratelimits": [
+    { "name": "LIMITE_ORDENES", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } },
+    { "name": "LIMITE_SUBIDA", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } },
+    { "name": "LIMITE_LECTURAS", "namespace_id": "1003", "simple": { "limit": 120, "period": 60 } }
+  ],
+  "vars": {
+    "CUOTA_BYTES": "262144000",
+    "TOPE_INCIDENTES": "2000",
+    "UMBRAL_D1_BYTES": "400000000",
+    "TOPE_ALTAS_HORA": "1000",
+    "KID_ACUSE": "prueba_1"
+  }
+}
