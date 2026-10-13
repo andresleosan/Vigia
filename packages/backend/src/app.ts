@@ -1,7 +1,10 @@
-import { ErrorFormato } from '@vigia/shared';
+import { ErrorFormato, MAX_JSON } from '@vigia/shared';
 import { Hono } from 'hono';
+import { alta } from './alta.ts';
 import type { Entorno } from './entorno.ts';
-import { Rechazo, respuestaError } from './errores.ts';
+import { Rechazo, respuestaError, TIPO_JSON } from './errores.ts';
+import { limite, tipoExacto } from './firma.ts';
+import { estado } from './lecturas.ts';
 
 export type Opciones = { ahora: () => number };
 
@@ -14,6 +17,9 @@ export function crearApp({ ahora }: Opciones) {
     if (c.req.raw.url.includes('?')) throw new Rechazo('firma');
     await next();
   });
+
+  app.post('/v1/devices', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => alta(c, ahora()));
+  app.get('/v1/incidents/:id', (c) => estado(c, ahora()));
 
   app.notFound(() => respuestaError('no_existe'));
   // Sin console y sin el texto de la excepción (ERR-01, LOG-01).
