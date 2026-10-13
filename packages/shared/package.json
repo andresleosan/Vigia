@@ -1,0 +1,21 @@
+{
+  "name": "@vigia/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hpke-core": "./src/hpke-core.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p .",
+    "verificar": "node herramientas/verificar.ts",
+    "vectores": "node herramientas/generar-vectores.ts"
+  },
+  "devDependencies": {
+    "@hpke/core": "1.9.0",
+    "@types/node": "26.6.4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

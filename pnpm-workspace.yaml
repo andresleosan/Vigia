@@ -1,0 +1,8 @@
+packages:
+  - packages/*
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
+strictDepBuilds: true
+blockExoticSubdeps: true
+savePrefix: ""
+allowBuilds: {}
