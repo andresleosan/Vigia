@@ -36,3 +36,13 @@ export async function leerRegistro(c: Contexto, ahora: number): Promise<Response
   if (!objeto) throw new Error('r2'); // fila sin objeto: 500; la conciliación externa lo detecta
   return respuestaSobre(fila, new Uint8Array(await objeto.arrayBuffer()));
 }
+
+// GET /v1/incidents/:id/close: el cierre como sobre y su acuse; 404 si no hay cierre.
+export async function leerCierre(c: Contexto, ahora: number): Promise<Response> {
+  const id = idDeRuta(c);
+  const firmante = await comprobarFirma(c, new Uint8Array(0), ahora, 'lectura', false);
+  await cupo(c.env.LIMITE_LECTURAS, firmante.id);
+  const fila = await c.env.DB.prepare('SELECT c.r, c.s, c.acuse FROM cierres c JOIN incidentes i ON i.id = c.incidente WHERE c.incidente = ?1 AND i.dispositivo = ?2').bind(id, firmante.id).first<Guardado>();
+  if (!fila) throw new Rechazo('no_existe');
+  return respuestaSobre(fila, new Uint8Array(0));
+}

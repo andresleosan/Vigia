@@ -1,11 +1,13 @@
-import { ErrorFormato, MAX_JSON } from '@vigia/shared';
+import { ErrorFormato, MAX_JSON, MAX_SOBRE } from '@vigia/shared';
 import { Hono } from 'hono';
 import { alta } from './alta.ts';
+import { cerrar } from './cierre.ts';
 import type { Entorno } from './entorno.ts';
-import { Rechazo, respuestaError, TIPO_JSON } from './errores.ts';
+import { Rechazo, respuestaError, TIPO_JSON, TIPO_SOBRE } from './errores.ts';
 import { limite, tipoExacto } from './firma.ts';
 import { abrir } from './incidentes.ts';
-import { estado, leerRegistro } from './lecturas.ts';
+import { ingerir } from './ingesta.ts';
+import { estado, leerCierre, leerRegistro } from './lecturas.ts';
 
 export type Opciones = { ahora: () => number };
 
@@ -22,7 +24,10 @@ export function crearApp({ ahora }: Opciones) {
   app.post('/v1/devices', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => alta(c, ahora()));
   app.post('/v1/incidents', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => abrir(c, ahora()));
   app.get('/v1/incidents/:id', (c) => estado(c, ahora()));
+  app.put('/v1/incidents/:id/chunks/:seq', tipoExacto(TIPO_SOBRE), limite(MAX_SOBRE), (c) => ingerir(c, ahora()));
+  app.post('/v1/incidents/:id/close', tipoExacto(TIPO_JSON), limite(MAX_JSON), (c) => cerrar(c, ahora()));
   app.get('/v1/incidents/:id/chunks/:seq', (c) => leerRegistro(c, ahora()));
+  app.get('/v1/incidents/:id/close', (c) => leerCierre(c, ahora()));
 
   app.notFound(() => respuestaError('no_existe'));
   // Sin console y sin el texto de la excepción (ERR-01, LOG-01).
