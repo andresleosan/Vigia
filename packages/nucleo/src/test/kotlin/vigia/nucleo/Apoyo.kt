@@ -21,3 +21,27 @@ fun JSONObject.bytes(clave: String): ByteArray = Codificacion.deHex(getString(cl
 
 /** Un campo de texto del vector (un JCV o un cuerpo JSON), como sus bytes ASCII. */
 fun JSONObject.texto(clave: String): ByteArray = ascii(getString(clave))
+
+fun posicionDe(c: JSONObject): Posicion =
+    Posicion(c.getLong("hora_fix"), c.getInt("lat_e6"), c.getInt("lon_e6"), c.getInt("precision_m"))
+
+/** El registro de Kotlin con los campos de un JCV de los vectores. */
+fun registroDe(jcv: String): Registro {
+    val c = JSONObject(jcv)
+    return when (c.getString("tipo")) {
+        "apertura" -> Apertura(
+            c.getString("incidente"), c.getLong("hora_telefono"), c.getString("country_code"),
+            c.getString("dispositivo"), c.getString("origen"), c.getString("kc"),
+        )
+        "fragmento" -> Fragmento(
+            c.getString("incidente"), c.getInt("seq"), c.getLong("hora_telefono"), c.getString("p"), c.getString("c"),
+            c.getString("prev"), if (c.has("loc")) c.getString("loc") else null,
+        )
+        "hueco" -> Hueco(
+            c.getString("incidente"), c.getInt("seq"), c.getLong("hora_telefono"), c.getString("prev"),
+            c.getLong("fin"), c.getString("motivo"),
+        )
+        "cierre" -> Cierre(c.getString("incidente"), c.getLong("hora_telefono"), c.getInt("ultimo_seq"), c.getString("hash_final"))
+        else -> throw ErrorFormato("tipo desconocido en el vector")
+    }
+}
