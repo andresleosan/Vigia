@@ -1,0 +1,101 @@
+{
+  "b64u": [
+    {
+      "hex": "",
+      "b64u": ""
+    },
+    {
+      "hex": "00",
+      "b64u": "AA"
+    },
+    {
+      "hex": "ff",
+      "b64u": "_w"
+    },
+    {
+      "hex": "fbff",
+      "b64u": "-_8"
+    },
+    {
+      "hex": "fbffbf",
+      "b64u": "-_-_"
+    },
+    {
+      "hex": "0001020304",
+      "b64u": "AAECAwQ"
+    },
+    {
+      "hex": "000102030405",
+      "b64u": "AAECAwQF"
+    },
+    {
+      "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "b64u": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0-Pw"
+    }
+  ],
+  "b64u_rechazados": [
+    "A",
+    "AB",
+    "AAB",
+    "AA==",
+    "AA=",
+    "A+",
+    "A/",
+    "A A",
+    "AAAAA",
+    "A.",
+    "Zg=",
+    "QUJD\n"
+  ],
+  "hex_rechazados": [
+    "AB",
+    "abc",
+    "zz",
+    "0g",
+    " 00"
+  ],
+  "u16be": [
+    {
+      "n": 0,
+      "hex": "0000"
+    },
+    {
+      "n": 1,
+      "hex": "0001"
+    },
+    {
+      "n": 255,
+      "hex": "00ff"
+    },
+    {
+      "n": 256,
+      "hex": "0100"
+    },
+    {
+      "n": 65535,
+      "hex": "ffff"
+    }
+  ],
+  "u32be": [
+    {
+      "n": 0,
+      "hex": "00000000"
+    },
+    {
+      "n": 1,
+      "hex": "00000001"
+    },
+    {
+      "n": 999999,
+      "hex": "000f423f"
+    },
+    {
+      "n": 16777216,
+      "hex": "01000000"
+    },
+    {
+      "n": 4294967295,
+      "hex": "ffffffff"
+    }
+  ]
+}

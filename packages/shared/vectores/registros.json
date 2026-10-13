@@ -1,0 +1,49 @@
+{
+  "incidente": "incidente-de-prueba-01",
+  "k": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "registros": [
+    {
+      "nombre": "apertura",
+      "jcv": "{\"country_code\":\"VE\",\"dispositivo\":\"5cd252fb0ce8932436faf8ccd1040981b89ee4ad6b9fe9e2a2b7e71aacb27cd3\",\"hora_telefono\":1791799200000,\"incidente\":\"incidente-de-prueba-01\",\"kc\":\"94ca3484c1fe23429a2cda102e46b3d9f94d654a5f8b1088b87756befb4293f3\",\"origen\":\"grabar\",\"seq\":0,\"tipo\":\"apertura\",\"v\":1}",
+      "hash": "92edd0eeb835119234876426107a48e8b02546775e95ae1e7faca17e5807cc7c",
+      "prefijo": "76696769612f76312f726567697374726f00"
+    },
+    {
+      "nombre": "fragmento_1",
+      "jcv": "{\"c\":\"179eb10449a280278208d001c754d229ba6d5c2de9c17250dca4af4b293fc5f1\",\"hora_telefono\":1791799201000,\"incidente\":\"incidente-de-prueba-01\",\"loc\":\"sLGys7S1tre4ubq74ncyxJ6s5DkugLWY_Gqx87MFcOMsG78FbuKgnT320CwnehEUUOqTjpJjgmYe1e3bD1c16iIDbMd7v1gDNrkM3cKaW9djzw-1d4PPfKQ30B1k4qzexB0bstfBWqAbaT-PU5BOa_7nBiZufirsourwsD2Gh6dDw_0KSDfH6S4-DV-C5cRVOcUtllkC3fIUu5cH\",\"p\":\"8b02c255f2669cf41efdf956284488aec4724a2d398b4ca247543672c35e1c9a\",\"prev\":\"92edd0eeb835119234876426107a48e8b02546775e95ae1e7faca17e5807cc7c\",\"seq\":1,\"tipo\":\"fragmento\",\"v\":1}",
+      "hash": "255ce57c81eb7d939f7372cf01d5740cefc679d9eb8bb4f19eaf89ca9e877bac",
+      "prefijo": "76696769612f76312f726567697374726f00",
+      "audio": "101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "nonce": "a0a1a2a3a4a5a6a7a8a9aaab",
+      "cifrado": "a0a1a2a3a4a5a6a7a8a9aaabf6096e3e51de14a87a7c9dc81b67dec1508d7b33b692644bb4270cad53865b2ee24775cc9b17650a67a53ef33547bdc65a2e8cea0b87dd70191a9e4f7ca89b5f",
+      "posicion": {
+        "hora_fix": 1791799195000,
+        "lat_e6": 12345678,
+        "lon_e6": -98765432,
+        "precision_m": 12
+      },
+      "nonce_loc": "b0b1b2b3b4b5b6b7b8b9babb"
+    },
+    {
+      "nombre": "fragmento_2",
+      "jcv": "{\"c\":\"2d68f549fa72f1574a02d87a709ebd643d570e4bf9ef21b3ef8476860a44ae39\",\"hora_telefono\":1791799205000,\"incidente\":\"incidente-de-prueba-01\",\"p\":\"6a5bcaef3859cf071e2827e2beec8e60b5bc9df793d8a479f4b317eddaf7ec54\",\"prev\":\"255ce57c81eb7d939f7372cf01d5740cefc679d9eb8bb4f19eaf89ca9e877bac\",\"seq\":2,\"tipo\":\"fragmento\",\"v\":1}",
+      "hash": "a78ff8ad5d021dbee104e13a2d2fc66d0b8a73aeb59f00adfee107ca57aa524f",
+      "prefijo": "76696769612f76312f726567697374726f00",
+      "audio": "505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f",
+      "nonce": "c0c1c2c3c4c5c6c7c8c9cacb",
+      "cifrado": "c0c1c2c3c4c5c6c7c8c9cacb50197534232dc009c080a7f96ef1b6092c12815c588779dd42aa21615b1011d9cce7e5d406ae3374b0342e6285b91bf60fb62b8f4e67fca4c70b255f9ceb0786"
+    },
+    {
+      "nombre": "hueco_3",
+      "jcv": "{\"fin\":1791799212500,\"hora_telefono\":1791799209000,\"incidente\":\"incidente-de-prueba-01\",\"motivo\":\"microfono\",\"prev\":\"a78ff8ad5d021dbee104e13a2d2fc66d0b8a73aeb59f00adfee107ca57aa524f\",\"seq\":3,\"tipo\":\"hueco\",\"v\":1}",
+      "hash": "9bc764c64515a0ba375dae454ed6d9bbe7cecacd88f3993fae6255ddf2620218",
+      "prefijo": "76696769612f76312f726567697374726f00"
+    },
+    {
+      "nombre": "cierre",
+      "jcv": "{\"hash_final\":\"9bc764c64515a0ba375dae454ed6d9bbe7cecacd88f3993fae6255ddf2620218\",\"hora_telefono\":1791799213000,\"incidente\":\"incidente-de-prueba-01\",\"tipo\":\"cierre\",\"ultimo_seq\":3,\"v\":1}",
+      "hash": "8497794217c2603567ecbc8500733973fbaf8cf07bad2fbbfe24981f7be4e7b9",
+      "prefijo": "76696769612f76312f63696572726500"
+    }
+  ]
+}

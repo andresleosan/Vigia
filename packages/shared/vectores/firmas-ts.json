@@ -1,0 +1,296 @@
+{
+  "dispositivo": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3Jidvf4vXc023WO4O3O1ly7ARyPHtYSLnVWg6NmLoFnurJcVbWSv31cpARIu-V5p0m3DJcbGY5rnllCnhsNyZg",
+  "lectura": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEkdVXNVimG0R0MKyHbHZGKilQrHloP91Xi78bwIx-gQZDzZ_sTK9MKF9oqy3Ltyp261ch-0y96XNm5lS-0XJt3A",
+  "registros": [
+    {
+      "nombre": "apertura",
+      "r": "{\"country_code\":\"VE\",\"dispositivo\":\"e63c551e5ef26ed7e5e20515671945556d000571fb0e9890680a4bc544851b35\",\"hora_telefono\":1791799200000,\"incidente\":\"incidente-de-prueba-01\",\"kc\":\"94ca3484c1fe23429a2cda102e46b3d9f94d654a5f8b1088b87756befb4293f3\",\"origen\":\"grabar\",\"seq\":0,\"tipo\":\"apertura\",\"v\":1}",
+      "s": "ed16a00f2449a5b20f2339388aedfe2a21d16b7d4d3f08649e02589f29ef5a2168f4eb190479b9639b88436517aaa9c6d1d5cd945fd2089b6898eda40a8e1221"
+    },
+    {
+      "nombre": "fragmento_1",
+      "r": "{\"c\":\"179eb10449a280278208d001c754d229ba6d5c2de9c17250dca4af4b293fc5f1\",\"hora_telefono\":1791799201000,\"incidente\":\"incidente-de-prueba-01\",\"loc\":\"sLGys7S1tre4ubq74ncyxJ6s5DkugLWY_Gqx87MFcOMsG78FbuKgnT320CwnehEUUOqTjpJjgmYe1e3bD1c16iIDbMd7v1gDNrkM3cKaW9djzw-1d4PPfKQ30B1k4qzexB0bstfBWqAbaT-PU5BOa_7nBiZufirsourwsD2Gh6dDw_0KSDfH6S4-DV-C5cRVOcUtllkC3fIUu5cH\",\"p\":\"8b02c255f2669cf41efdf956284488aec4724a2d398b4ca247543672c35e1c9a\",\"prev\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"seq\":1,\"tipo\":\"fragmento\",\"v\":1}",
+      "s": "bfc418d613660c2b51c3c498a943a4ce3d645bd36fb94f472bf591626ebcdf9f800b6ad4389a4a755dc1e89628d0ccad6ffe58f5a028c420bceb091405691750"
+    },
+    {
+      "nombre": "fragmento_2",
+      "r": "{\"c\":\"2d68f549fa72f1574a02d87a709ebd643d570e4bf9ef21b3ef8476860a44ae39\",\"hora_telefono\":1791799205000,\"incidente\":\"incidente-de-prueba-01\",\"p\":\"6a5bcaef3859cf071e2827e2beec8e60b5bc9df793d8a479f4b317eddaf7ec54\",\"prev\":\"181f69f3022b6663e7e194e8d2cfca844a5d5c6eef1e2a854b98ae10733057b2\",\"seq\":2,\"tipo\":\"fragmento\",\"v\":1}",
+      "s": "8666d8058a51d0783cd26d4637d28118f47a49b86cfb6ae16919a0b4e3dd125d01daa163ee8f9eab4ba300d2d1b63c8013ce10a86b2969f9fc30b16e413ec4d2"
+    },
+    {
+      "nombre": "hueco_3",
+      "r": "{\"fin\":1791799212500,\"hora_telefono\":1791799209000,\"incidente\":\"incidente-de-prueba-01\",\"motivo\":\"microfono\",\"prev\":\"8c00185f96ac0ebd361de8c91e203b709377d1f871ffed355e301f8e397da312\",\"seq\":3,\"tipo\":\"hueco\",\"v\":1}",
+      "s": "3c6e795f9748dac93fcc04ec491008b350c0490dcf661c948b5a31768590666c40e34ace3ef35a3e7050acef26c055ec332b845d1aadd7ab9b7ff11f14e1a2dc"
+    },
+    {
+      "nombre": "cierre",
+      "r": "{\"hash_final\":\"5ebd9a147d8dcb310ae51210b9af3f3425b7dbc97fc28864828aa47220795612\",\"hora_telefono\":1791799213000,\"incidente\":\"incidente-de-prueba-01\",\"tipo\":\"cierre\",\"ultimo_seq\":3,\"v\":1}",
+      "s": "276302e3240c63024b8f474969efffb26d77a3a2705a17aeda065d68386571fe8c607c9c40e9c0e28a1f399c80280d2f875d9a3b1ecf3dad2febf6cc731404c5"
+    }
+  ],
+  "ecdsa": {
+    "spki": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEVyCBsRbHf981RgACv9gSoRevuyThOtug5t-9GVvk6KmTw9Pme_nx-JkHlDT853AywAhl38mIaYSNRbuWHbGh1w",
+    "mensaje": "76696769613a206d656e73616a65206465207072756562612070617261204543445341",
+    "casos": [
+      {
+        "nombre": "valida",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbfbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c115",
+        "valida": true
+      },
+      {
+        "nombre": "n_menos_s",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbb0418ae907183e268a76cf73fc26b10a31334d89291b7a26509e251529c11643c",
+        "valida": true
+      },
+      {
+        "nombre": "r_de_31_bytes",
+        "firma": "0076c6e920786db6455797547ce6d1f1712e09d0e1c2abcba77cff4872f166d009ea426b8586ef8276dff3992092f9a909890bc1cf6c6662e908470e6388ee06",
+        "valida": true
+      },
+      {
+        "nombre": "s_de_31_bytes",
+        "firma": "35a530fbb8b7472a1e3af7e8f8de3ed9d89d4fc2e9b73aa3b631c7c15dc860c20077ceeb803c9a7f36e89ffc859e91de09800652094e72be719f738d48754f35",
+        "valida": true
+      },
+      {
+        "nombre": "r_de_33_bytes",
+        "firma": "c375b1a449acc4c9c6db5220cf1671d6b3c69b2b7c9eefd1ad9b80b14d9b8846cc5cf01ecdd367e2218f2e23b2dfcbc944ae2f1868f2e6c3e4ac66245c587169",
+        "valida": true
+      },
+      {
+        "nombre": "s_de_33_bytes",
+        "firma": "6a65e3f560bf67cc8ce0a098df34746c9d96aa8f5f256f5c6a5d979a6e01f372917aa5c2c579ace843bab96d97735d67ebef78359c2718cf552113f990e4868a",
+        "valida": true
+      },
+      {
+        "nombre": "r_cero",
+        "firma": "0000000000000000000000000000000000000000000000000000000000000000fbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c115",
+        "valida": false
+      },
+      {
+        "nombre": "s_cero",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbb0000000000000000000000000000000000000000000000000000000000000000",
+        "valida": false
+      },
+      {
+        "nombre": "r_igual_a_n",
+        "firma": "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551fbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c115",
+        "valida": false
+      },
+      {
+        "nombre": "s_igual_a_n",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551",
+        "valida": false
+      },
+      {
+        "nombre": "r_mayor_que_n",
+        "firma": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c115",
+        "valida": false
+      },
+      {
+        "nombre": "s_mayor_que_n",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "valida": false
+      },
+      {
+        "nombre": "firma_de_63_bytes",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbfbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c1",
+        "valida": false
+      },
+      {
+        "nombre": "firma_de_65_bytes",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbfbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c11500",
+        "valida": false
+      },
+      {
+        "nombre": "bit_cambiado",
+        "firma": "2ca0421a94230c1f24b11841d4fb0c46826ce3a49f81303f080e0be494e12fbbfbe7516e8e7c1d98589308c03d94ef5ca9b2221b155ffc1fe9d779706051c114",
+        "valida": false
+      }
+    ]
+  },
+  "peticiones": [
+    {
+      "nombre": "alta",
+      "metodo": "POST",
+      "ruta": "/v1/devices",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "registro",
+      "cuerpo": "7b226c656374757261223a224d466b77457759484b6f5a497a6a3043415159494b6f5a497a6a304441516344516741456b6456584e56696d473052304d4b794862485a474b696c5172486c6f50393158693738627749782d67515a447a5a5f73544b394d4b46396f7179334c74797032363163682d30793936584e6d356c532d30584a743341222c227075626c696361223a224d466b77457759484b6f5a497a6a3043415159494b6f5a497a6a30444151634451674145334a6964766634765863303233574f344f334f316c793741527950487459534c6e565767364e6d4c6f466e75724a63566257537633316370415249752d563570306d33444a6362475935726e6c6c436e68734e795a67227d",
+      "firmante": "dispositivo",
+      "firma": "OE7kW385ZO8Gy4Y_UCWPNtwBg84s5yKZMEvTbk3mwWGRg7jno1rMzFjaQsvHx-RT3vrt217kCZxhSgCar0LHbg"
+    },
+    {
+      "nombre": "apertura",
+      "metodo": "POST",
+      "ruta": "/v1/incidents",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "7b22656e766f6c7475726173223a5b5d2c2272223a2265794a6a6233567564484a3558324e765a4755694f694a5752534973496d52706333427663326c3061585a76496a6f695a54597a597a55314d5755315a5759794e6d566b4e3255315a5449774e5445314e6a63784f5451314e5455325a4441774d4455334d575a694d4755354f446b774e6a677759545269597a55304e4467314d57497a4e534973496d6876636d4666644756735a575a76626d38694f6a45334f5445334f546b794d4441774d444173496d6c7559326c6b5a5735305a534936496d6c7559326c6b5a5735305a53316b5a533177636e566c596d45744d4445694c434a7259794936496a6b305932457a4e446730597a466d5a54497a4e44493559544a6a5a4745784d444a6c4e445a694d3251355a6a6b305a4459314e4745315a6a68694d5441344f4749344e7a63314e6d4a6c5a6d49304d6a6b7a5a6a4d694c434a76636d6c6e5a5734694f694a6e636d4669595849694c434a7a5a5845694f6a4173496e5270634738694f694a68634756796448567959534973496e59694f6a4639222c2273223a22375261674479524a70624950497a6b346975332d4b6948526133314e5077686b6e674a596e796e765769466f394f735a42486d35593575495132555871716e473064584e6c465f53434a746f6d4f326b436f34534951227d",
+      "firmante": "dispositivo",
+      "firma": "KvjB9JD7LkNdIn_LsHjWD5pOQjaaBYtFz7jhL7LUucBGvagTs_dmJfbp1WqPO88Whtmh0zoekVmRuafVoSQDRA"
+    },
+    {
+      "nombre": "apertura_tras_401_hora",
+      "metodo": "POST",
+      "ruta": "/v1/incidents",
+      "hora": 1791799580000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "7b22656e766f6c7475726173223a5b5d2c2272223a2265794a6a6233567564484a3558324e765a4755694f694a5752534973496d52706333427663326c3061585a76496a6f695a54597a597a55314d5755315a5759794e6d566b4e3255315a5449774e5445314e6a63784f5451314e5455325a4441774d4455334d575a694d4755354f446b774e6a677759545269597a55304e4467314d57497a4e534973496d6876636d4666644756735a575a76626d38694f6a45334f5445334f546b794d4441774d444173496d6c7559326c6b5a5735305a534936496d6c7559326c6b5a5735305a53316b5a533177636e566c596d45744d4445694c434a7259794936496a6b305932457a4e446730597a466d5a54497a4e44493559544a6a5a4745784d444a6c4e445a694d3251355a6a6b305a4459314e4745315a6a68694d5441344f4749344e7a63314e6d4a6c5a6d49304d6a6b7a5a6a4d694c434a76636d6c6e5a5734694f694a6e636d4669595849694c434a7a5a5845694f6a4173496e5270634738694f694a68634756796448567959534973496e59694f6a4639222c2273223a22375261674479524a70624950497a6b346975332d4b6948526133314e5077686b6e674a596e796e765769466f394f735a42486d35593575495132555871716e473064584e6c465f53434a746f6d4f326b436f34534951227d",
+      "firmante": "dispositivo",
+      "firma": "y8-SjbdgnSkeVc1XW1RWBotfnir0mbash_FXzhOn7gzzJS1Pgk-mSbvfQrvSKDZH7Iidf85eSu9NQno1Ke4SBg"
+    },
+    {
+      "nombre": "fragmento",
+      "metodo": "PUT",
+      "ruta": "/v1/incidents/incidente-de-prueba-01/chunks/1",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "02167b2263223a2231373965623130343439613238303237383230386430303163373534643232396261366435633264653963313732353064636134616634623239336663356631222c22686f72615f74656c65666f6e6f223a313739313739393230313030302c22696e636964656e7465223a22696e636964656e74652d64652d7072756562612d3031222c226c6f63223a22734c4779733753317472653475627137346e6379784a367335446b75674c57595f47717838374d46634f4d734737384662754b676e5433323043776e65684555554f71546a704a6a676d5965316533624431633136694944624d6437763167444e726b4d33634b615739646a7a772d3164345050664b51333042316b34717a6578423062737466425771416261542d505535424f615f376e42695a75666972736f7572777344324768366444775f304b534466483653342d44562d43356352564f6355746c6c6b433366495575356348222c2270223a2238623032633235356632363639636634316566646639353632383434383861656334373234613264333938623463613234373534333637326333356531633961222c2270726576223a2237613432393333343032613030313565383164353166316366626132326133646464656536626233326233623232303230656262663163323863396164393161222c22736571223a312c227469706f223a22667261676d656e746f222c2276223a317dbfc418d613660c2b51c3c498a943a4ce3d645bd36fb94f472bf591626ebcdf9f800b6ad4389a4a755dc1e89628d0ccad6ffe58f5a028c420bceb091405691750a0a1a2a3a4a5a6a7a8a9aaabf6096e3e51de14a87a7c9dc81b67dec1508d7b33b692644bb4270cad53865b2ee24775cc9b17650a67a53ef33547bdc65a2e8cea0b87dd70191a9e4f7ca89b5f",
+      "firmante": "dispositivo",
+      "firma": "2iF5j8A2yz9vxXXxwSNGcdOTqcJM44fOV79AXIAcxoTNyH9WbXfW7nmkSAlGkMBNMHeuOaXPYgYWzqO9qF-4YQ"
+    },
+    {
+      "nombre": "cierre",
+      "metodo": "POST",
+      "ruta": "/v1/incidents/incidente-de-prueba-01/close",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "7b2272223a2265794a6f59584e6f58325a70626d4673496a6f694e5756695a446c684d5451335a44686b5932497a4d5442685a5455784d6a4577596a6c685a6a4e6d4d7a51794e5749335a474a6a4f54646d597a49344f4459304f444934595745304e7a49794d4463354e5459784d694973496d6876636d4666644756735a575a76626d38694f6a45334f5445334f546b794d544d774d444173496d6c7559326c6b5a5735305a534936496d6c7559326c6b5a5735305a53316b5a533177636e566c596d45744d4445694c434a3061584276496a6f6959326c6c636e4a6c49697769645778306157317658334e6c635349364d797769646949364d5830222c2273223a224a324d433479514d59774a4c6a30644a61655f5f736d31336f364a775768657532675a646144686c6366364d59487963514f6e41346f6f664f5a79414b413076683132614f78375050613076365f624d637851457851227d",
+      "firmante": "dispositivo",
+      "firma": "ORK5pWQOipcolgHggJtpLWcjjTFbl4yychrPUMRV5LIau21T3xOyayg0lycVOxiQ1ifGfSvu4_gYl-OPbwa1ig"
+    },
+    {
+      "nombre": "estado",
+      "metodo": "GET",
+      "ruta": "/v1/incidents/incidente-de-prueba-01",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "",
+      "firmante": "lectura",
+      "firma": "I-dFPSGujejW4IYL8vwCcbMk3zBMzWw7fCWAP1Jd17MG_bidSHxlpOyLS6YV_KV4uh57AVMYp2KtAVziZWs8Sg"
+    },
+    {
+      "nombre": "lectura_apertura",
+      "metodo": "GET",
+      "ruta": "/v1/incidents/incidente-de-prueba-01/chunks/0",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "",
+      "firmante": "lectura",
+      "firma": "Yk45P6XySTkwDsYkZ1r_2jtGKpWkng4YcJL6PNajQauuteY4hzy358BJ8keMMzPPEU5EanYem-4vNErcSmACKg"
+    },
+    {
+      "nombre": "lectura_cierre",
+      "metodo": "GET",
+      "ruta": "/v1/incidents/incidente-de-prueba-01/close",
+      "hora": 1791799220000,
+      "id_peticion": "peticion-de-prueba-001",
+      "id_dispositivo": "dispositivo-de-prueba1",
+      "cuerpo": "",
+      "firmante": "lectura",
+      "firma": "ioTEQaK_9kRCZJCI-BNL7tQFyzZyTQhr4hQ6V60_F98-EvGKyTNolVZviLexTPqoZVHSlt8AL0tF3YVs1GeeKw"
+    }
+  ],
+  "claves_acuse": [
+    "{\"desde\":1791712800000,\"estado\":\"activa\",\"kid\":\"prueba_activa\",\"spki\":\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEidn8naiBUtfdStTm7-JpbDj50Gn0GvHXs9mGp9XgBscuXNEQYDPwbRjzKKwLMzT9EsIxvh32aMj-JdvUkRXI8w\",\"v\":1}",
+    "{\"desde\":1791712800000,\"estado\":\"retirada\",\"hasta\":1791799230000,\"kid\":\"prueba_retirada\",\"spki\":\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEPuVrbtwc53DJrgUTuPA8HVQQgiwhEzHxa4uXnu8-tb7RvbOAgO1pnOISmFpO2KCIETdp6cbCSaIgopzm-y3D1g\",\"v\":1}",
+    "{\"desde\":1791712800000,\"estado\":\"comprometida\",\"kid\":\"prueba_comprometida\",\"spki\":\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEafi_erLkRzIxfendykHdNJrf0mcTw99XS09XKx5KwGtPD3-B0EHJwsbabSrg-5fPOkd5sxik8wZXVJCXlk6HXA\",\"v\":1}"
+  ],
+  "acuses": [
+    {
+      "nombre": "valido",
+      "acuse": "{\"firma\":\"4uCvwEfsFx1ASVfEw83lNVNfRkjXTrSY7db8vXF6-W8z7XZwGZ2z2WYzVaUMXyK9XE6deA7B1vIQaHvRF54Ogg\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_activa\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "valido"
+    },
+    {
+      "nombre": "del_fragmento_1",
+      "acuse": "{\"firma\":\"LIOjYPvxOPDpOPePu4QfbV2nsnJ4A7HOriIBvgDBLNNmK6Uiq-_TpknwQaa40kt1DzdVDoyHRzDN68b4TAiAvg\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_activa\",\"r\":\"181f69f3022b6663e7e194e8d2cfca844a5d5c6eef1e2a854b98ae10733057b2\",\"v\":1}",
+      "r": "181f69f3022b6663e7e194e8d2cfca844a5d5c6eef1e2a854b98ae10733057b2",
+      "resultado": "valido"
+    },
+    {
+      "nombre": "retirada_en_su_ventana",
+      "acuse": "{\"firma\":\"le1IjO1Y10uCdTgVAbo5tGeZs_fPhxl5wqUnCU-V0JhjA7rJWcJpJarUqPFJYMafXScCh3jblgDiBtA3PomJGA\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_retirada\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "valido"
+    },
+    {
+      "nombre": "retirada_fuera_de_su_ventana",
+      "acuse": "{\"firma\":\"7dD3cS2nRdcZemCurOb_iV_hyySE674vNvz4_mblZD-TDpMo7N3nsPBcAT-aHkQPS6aEn1lT2DLwqWspRdnEVQ\",\"hora_servidor\":1791799230001,\"kid\":\"prueba_retirada\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "invalido"
+    },
+    {
+      "nombre": "antes_de_desde",
+      "acuse": "{\"firma\":\"wForpyeO94YlDFXOzBTeT12rpJPjCGrZHeCOFSMlVpDWSb31HJCM9UGC7CUWJsZ6TfoGk4fbE-o21nQDzfCggw\",\"hora_servidor\":1791712799999,\"kid\":\"prueba_activa\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "invalido"
+    },
+    {
+      "nombre": "clave_comprometida",
+      "acuse": "{\"firma\":\"abwLQKDyINM9wxdlraMrZEHAIZMSpyeMQWhHzbQk65H5scYlsg8_SMV9V5b45ZPDsDXgKwxrJVUXfPAVsuusDw\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_comprometida\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "comprometido"
+    },
+    {
+      "nombre": "kid_desconocido",
+      "acuse": "{\"firma\":\"F5xw3YuSnFaKlANsewuTOe0811-0tw3xATyRD4yWl_MUFLrEZ3S_hm3Y_ANOc1EWZRqKayzyMHpx_ImkvkCvSg\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_desconocida\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "desconocido"
+    },
+    {
+      "nombre": "hora_cambiada",
+      "acuse": "{\"firma\":\"4uCvwEfsFx1ASVfEw83lNVNfRkjXTrSY7db8vXF6-W8z7XZwGZ2z2WYzVaUMXyK9XE6deA7B1vIQaHvRF54Ogg\",\"hora_servidor\":1791799230001,\"kid\":\"prueba_activa\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "invalido"
+    },
+    {
+      "nombre": "firma_cambiada",
+      "acuse": "{\"firma\":\"4-CvwEfsFx1ASVfEw83lNVNfRkjXTrSY7db8vXF6-W8z7XZwGZ2z2WYzVaUMXyK9XE6deA7B1vIQaHvRF54Ogg\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_activa\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a",
+      "resultado": "invalido"
+    },
+    {
+      "nombre": "r_de_otro_registro",
+      "acuse": "{\"firma\":\"4uCvwEfsFx1ASVfEw83lNVNfRkjXTrSY7db8vXF6-W8z7XZwGZ2z2WYzVaUMXyK9XE6deA7B1vIQaHvRF54Ogg\",\"hora_servidor\":1791799230000,\"kid\":\"prueba_activa\",\"r\":\"7a42933402a0015e81d51f1cfba22a3dddee6bb32b3b22020ebbf1c28c9ad91a\",\"v\":1}",
+      "r": "181f69f3022b6663e7e194e8d2cfca844a5d5c6eef1e2a854b98ae10733057b2",
+      "resultado": "invalido"
+    }
+  ],
+  "eventos": [
+    {
+      "nombre": "alerta",
+      "evento": "{\"dispositivo\":\"e63c551e5ef26ed7e5e20515671945556d000571fb0e9890680a4bc544851b35\",\"evento\":\"alerta\",\"firma\":\"RnDMBirRl1IMf3BtjeVl6MduWnyTEaaWE5I4lYqkEgGXZzFF9sN0SD-SAHmmEbRHSsdUQjEAVCQ1wmMJ-A8E4Q\",\"hora_servidor\":1791799230000,\"incidente\":\"incidente-de-prueba-01\",\"kid\":\"prueba_activa\",\"v\":1}",
+      "resultado": "valido"
+    },
+    {
+      "nombre": "revocacion_del_telefono",
+      "evento": "{\"dispositivo\":\"e63c551e5ef26ed7e5e20515671945556d000571fb0e9890680a4bc544851b35\",\"evento\":\"revocacion\",\"firma\":\"LAavpcnDrLj3sCvSOmfCuzJ9LhhAVzbLnwCoYybIQb27w94Rh0v-NtMuZDOQ2o0prwus-wmMyeKm0Yv_HwRLEA\",\"hora_servidor\":1791799230000,\"incidente\":\"-\",\"kid\":\"prueba_activa\",\"v\":1}",
+      "resultado": "valido"
+    },
+    {
+      "nombre": "acceso_con_destino",
+      "resultado": "valido",
+      "evento": "{\"destino\":\"contacto-de-prueba-001\",\"dispositivo\":\"e63c551e5ef26ed7e5e20515671945556d000571fb0e9890680a4bc544851b35\",\"evento\":\"acceso\",\"firma\":\"v55CIF4O9B7G4NsxiJjFbDBz-k-HXXCsp7uaHjmQkdiatCVzFpP8xaKgIE1cONzQuL1Z_x0lVA6Athct8H5qAg\",\"hora_servidor\":1791799230000,\"incidente\":\"incidente-de-prueba-01\",\"kid\":\"prueba_activa\",\"v\":1}"
+    },
+    {
+      "nombre": "clave_comprometida",
+      "resultado": "comprometido",
+      "evento": "{\"dispositivo\":\"e63c551e5ef26ed7e5e20515671945556d000571fb0e9890680a4bc544851b35\",\"evento\":\"cancelacion\",\"firma\":\"AhCLDPCTvUzciWen4URT-cVKxhSKZE7qUT-wIQNk6eKteHhPHdiJK8fUtt4nQm8Lp1P06WX07Ign8doY-9tPrw\",\"hora_servidor\":1791799230000,\"incidente\":\"incidente-de-prueba-01\",\"kid\":\"prueba_comprometida\",\"v\":1}"
+    },
+    {
+      "nombre": "de_otro_dispositivo",
+      "evento": "{\"dispositivo\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"evento\":\"alerta\",\"firma\":\"RnDMBirRl1IMf3BtjeVl6MduWnyTEaaWE5I4lYqkEgGXZzFF9sN0SD-SAHmmEbRHSsdUQjEAVCQ1wmMJ-A8E4Q\",\"hora_servidor\":1791799230000,\"incidente\":\"incidente-de-prueba-01\",\"kid\":\"prueba_activa\",\"v\":1}",
+      "resultado": "invalido"
+    }
+  ]
+}
