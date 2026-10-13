@@ -2,6 +2,7 @@
 node_modules/
 .gradle/
 build/
+.kotlin/
 dist/
 .expo/
 *.apk
