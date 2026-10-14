@@ -1,4 +1,12 @@
 // WEB-01: cabeceras, un solo origen y maquetación de la página de presentación.
+// Sin red, en un solo contenedor de la imagen fijada (con red, wrangler guarda en .wrangler/cache/cf.json
+// la ubicación de la máquina y consulta su versión publicada), con el repo sincronizado en /work/vigia:
+//   docker run --rm --init --network none --cap-drop ALL --security-opt no-new-privileges --user 1001 \
+//     -v vigia-trabajo:/work -w /work/vigia/pruebas/sitio \
+//     mcr.microsoft.com/playwright@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27 sh -c '
+//       node_modules/.bin/wrangler pages dev /work/vigia/sitio --ip 127.0.0.1 --port 8788 > /tmp/wrangler.log 2>&1 &
+//       until node -e "fetch(\"http://127.0.0.1:8788/\").then(()=>0,()=>process.exit(1))"; do sleep 1; done
+//       node_modules/.bin/playwright test'
 import { test, expect } from '@playwright/test';
 
 const BASE = process.env.SITIO ?? 'http://127.0.0.1:8788';
