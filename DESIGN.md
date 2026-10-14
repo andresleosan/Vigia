@@ -264,6 +264,8 @@ Plano, como una señal. La profundidad se expresa con superficies tonales (fondo
 
 El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en Expo), que son el vocabulario nativo de Android. Los controles nativos de Material (interruptores, deslizadores) conservan su forma de sistema.
 
+**Marca.** La única marca de Vigía es una placa de información (▭) de tinta (`#1B1E1D`) con filete y V en blanco de señal (`#F6F7F5`), como una placa de ruta: la V es de corte vial, con terminales y vértice planos. Es el favicon de la página de presentación: `sitio/favicon.svg` y, generados con `pruebas/sitio/iconos.mjs`, `favicon.ico` (16 y 32 px) y `apple-touch-icon.png`, que sale de `pruebas/sitio/fuentes/apple-touch-icon.svg` con el filete más adentro por la máscara de iOS. A 16 px el filete dibuja la placa también sobre pestañas oscuras. Solo la usa esa página (decisión 73).
+
 ## Components
 
 **Botón principal (Grabar / Detener)**
@@ -360,6 +362,7 @@ El resto de iconos son **Material Icons** (`@expo/vector-icons`, ya incluido en 
 - Nada de terceros en la bóveda: ni fuentes externas, ni mapas incrustados, ni analítica, ni CDN.
 - Nunca la raya larga (U+2014) en los textos de la interfaz.
 - No inventar cifras, testimonios, logos ni contactos de organizaciones sin validar.
+- No usar la marca (la placa con la V) fuera de la página de presentación (decisión 73).
 - No mostrar consejo legal de un pack sin validar en una build de producción.
 
 ## Pantallas y estados
@@ -472,7 +475,7 @@ Todas se confirmaron el 11-oct-2026; las 28 a 38, el 12-oct-2026 (sección sigui
 | 10 | Disparo del SOS | Manual (mantener 3 s y cuenta atrás de 5 s) más un temporizador en el servidor (30 min por defecto) que se arma cuando el servidor se entera de la grabación. Aviso 5 min antes. Extender sin PIN; desarmar con PIN (la 50 limita extender sin PIN a 2 veces seguidas) |
 | 11 | Aviso a contactos | Telegram (el servidor guarda solo el `chat_id`) y Web Push. Sin números de teléfono. Mensajes sin contenido y bot con nombre neutro |
 | 12 | Coacción (9ª decisión) | Tres capas: vistazo en alcabala, desbloqueo forzado y forense. Lo que no se promete: ocultar la app ante un forense |
-| 13 | Identidad en el teléfono | Solo se disfraza el icono y el nombre del lanzador. A nivel de sistema la app se llama "Vigía" (riesgo aceptado: cabecera de la notificación, ajustes, indicador del micrófono). Con el camuflaje activado, la calculadora es la pantalla de PIN |
+| 13 | Identidad en el teléfono | Solo se disfraza el icono y el nombre del lanzador. A nivel de sistema la app se llama "Vigía" (riesgo aceptado: cabecera de la notificación, ajustes, indicador del micrófono). Con el camuflaje activado, la calculadora es la pantalla de PIN. La 73: su icono nunca es la marca |
 | 14 | PIN de coacción | Solo en avanzado. Abre el señuelo, dispara el SOS en silencio y detiene la grabación de verdad. No borra nada |
 | 15 | Reproducir en el teléfono | Base: sí, con el PIN. Avanzado: al cerrar el incidente el teléfono queda de solo escritura y se reproduce con el código de recuperación |
 | 16 | Borrado | Candado de R2 de 30 días por objeto. Borrar oculta en el teléfono al instante; en el servidor se ejecuta cuando el fragmento más reciente del incidente cumple 30 días, nunca con un SOS activo. Hasta entonces se puede deshacer con el PIN (la 61 lo extiende a cualquier alerta activa) |
@@ -612,6 +615,7 @@ Al aprobar el plan de F2 (`docs/plan/2026-10-12-plan-maestro-f2.md`) se fijaron 
 | 70 | Alta del dispositivo | Detalla la 60 y el requisito FIR-04 del plan de F2. La prueba de posesión del alta es la firma de la petición con la clave del dispositivo cuya pública va en el cuerpo (con `registro` como idDispositivo). La pública de lectura se registra en la misma alta sin prueba propia: la prueba es cada lectura firmada, y registrar una lectura ajena solo rompe las lecturas propias. Así el alta se puede reenviar con la pantalla bloqueada, porque la clave de lectura (con `setUnlockedDeviceRequired`) no interviene. Una pública ya registrada con la misma lectura recibe su id (200) sin gastar el tope; con otra lectura, 409: nunca se reemplaza. Cambiar la clave de lectura queda para H3b y nunca podrá hacerse solo con la clave del dispositivo |
 | 71 | Cuotas | Detalla la 55. Cada dispositivo tiene una cuota de por vida: `CUOTA_BYTES` (250 MiB; cada fragmento o hueco cuenta al menos 16 KiB) y `TOPE_INCIDENTES` (2 000 aperturas). Bloquean fragmentos, huecos y aperturas con 429 `cuota`, nunca el cierre, y solo las libera un borrado ejecutado (H7); el teléfono conserva el sobre. La guarda de D1 da el mismo 429 a las aperturas, los fragmentos y los huecos nuevos cuando la base pasa del 80 % de su máximo (`UMBRAL_D1_BYTES`), para que los cierres y, desde H5a, las alertas no fallen. Además hay cupos de 120 peticiones por minuto para órdenes, subida y lecturas, y un tope global de 2 altas por hora natural UTC (429 `tope_altas`), sin IP y sin prueba de trabajo en F2 (no hay personas reales); antes del piloto se decide qué bloquea ese tope (ver "Riesgos abiertos"). En la cola del teléfono (decisión 53), un 429 `tope_altas` espera hasta la hora UTC siguiente (su `Retry-After`) y un 429 `cuota`, al menos una hora; los dos solo hacen esperar a los elementos de su misma prioridad: una apertura sin cuota nunca frena un cierre |
 | 72 | Verificador | Detalla la 28 y la lección 7 de la 26. El verificador de `shared` (el CLI `verificar` y la bóveda) da hallazgos de una lista cerrada, en español, de dos clases: un fallo impide el ✓ de su registro, y lo que falla no cuenta; un aviso se muestra con el resultado. Lo auténtico sigue contando aunque otros registros fallen. El estado del paquete es `integro` (sin fallos, completo y con un cierre que cuenta), `incompleto` (sin fallos, pero falta algún registro o el cierre, o el cierre no se puede comprobar) o `fallido` (con algún fallo). Las claves del acuse son las fijadas en el verificador, nunca las del paquete. El algoritmo y todos los textos están en `docs/verificacion.md`; los de la manipulación, en "Evidencia y cifrado" |
+| 73 | Marca | Detalla la 13 y la 45 (14-oct-2026): la marca de Vigía (la placa de información con filete y V, en "Shapes") solo va en la página de presentación, porque se reconoce de un vistazo: en Ajustes y en el lanzador del teléfono, y en el navegador de los contactos. La app nunca la lleva: el icono de la aplicación (el que muestra Ajustes aunque el lanzador esté disfrazado) y el del alias "Vigía" del lanzador son neutros. La bóveda no declara icono propio y queda el del navegador: uno propio, aunque fuera neutro, sería una seña común a todas las bóvedas |
 
 ## Modelo de amenaza por país
 

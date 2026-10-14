@@ -48,7 +48,7 @@ Ninguna de las herramientas revisadas (Tella, ProofMode, eyeWitness, Mobile Just
 - Nombre: Vigía. A nivel de sistema la app se llama "Vigía"; solo el icono del lanzador se disfraza.
 - Voz: calmada, de tú, frases cortas. Nunca instiga la confrontación; prioriza la seguridad física.
 - Nada político: ni colores o símbolos partidistas, ni símbolos patrios. La app debe verse inocua si un agente mira la pantalla.
-- Logo: no existe todavía.
+- Logo: la placa de información (▭) de tinta con filete y V en blanco de señal, solo en la página de presentación (DESIGN.md, «Marca» y decisión 73).
 
 ## Evidence on Hand
 
