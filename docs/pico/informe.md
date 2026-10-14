@@ -32,6 +32,14 @@ Todas publicadas hace 7 días o más el 12-oct-2026.
 | gitleaks | 8.30.1 | imagen `zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` |
 | Vectores HPKE | cfrg/draft-irtf-cfrg-hpke@5f503c564da00b0687b3de75f1dfbdfc4079ad31 | SHA-256 `61fc662f01996cd06d713dacf5e133167bd309a1f329442d53f1e21a47b3ede6` |
 
+## Versiones fijadas (H0b)
+
+Lo que H0b añade a lo de H0a, todo publicado hace 7 días o más el 14-oct-2026.
+
+| Pieza | Versión | Comprobación |
+|---|---|---|
+| iproute2 (`tc` y `ss`) en el entorno de build | 6.1.0-1ubuntu6.4, de la instantánea `20261005T000000Z`, con libbpf1 1:1.3.0-2build2, libcap2-bin 1:2.66-5ubuntu2.4, libmnl0 1.0.5-2build1 y libxtables12 1.8.10-3ubuntu2 | `apt-get --snapshot`, en una capa nueva al final de la imagen `vigia-build:h0b`; las 9 capas de H0a no cambian |
+
 ## Entorno de build aislado (ENV-01)
 
 - Pregunta: ¿se puede compilar y probar sin que el código de terceros vea el registro privado, controle el host o tenga credenciales?

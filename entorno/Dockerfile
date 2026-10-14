@@ -61,3 +61,10 @@ USER vigia
 RUN git config --global --add safe.directory /fuente/banco \
  && git config --global --add safe.directory /fuente/banco/.git
 WORKDIR /work
+# H0b: iproute2 trae tc (netem de P7, en un contenedor auxiliar con NET_ADMIN) y ss (comprobación de OPS-03).
+# Sale de la misma instantánea y va en una capa al final: las de arriba siguen siendo las de H0a.
+USER root
+RUN apt-get update --snapshot "$APT_SNAPSHOT" \
+ && apt-get install -y --no-install-recommends --snapshot "$APT_SNAPSHOT" iproute2 \
+ && rm -rf /var/lib/apt/lists/*
+USER vigia
