@@ -22,6 +22,8 @@ dist/
 playwright-report/
 test-results/
 .wrangler/
+# Estado local de Claude Code
+.claude/
 # Bytecode de Python: lleva incrustada la ruta de la máquina
 __pycache__/
 *.pyc

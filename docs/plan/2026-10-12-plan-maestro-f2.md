@@ -1,6 +1,6 @@
 # Plan maestro de F2: el slice de Venezuela de Vigía
 
-> **Estado:** F1, versión con las decisiones del 12-oct-2026 (sección "Decisiones de F1"), pendiente de aprobación. No lleva código.
+> **Estado:** F1, versión con las decisiones del 12-oct-2026 (sección "Decisiones de F1"), aprobado el 12-oct-2026; las de H0b del 13 y 14-oct-2026 están en "Decisiones de H0b". No lleva código.
 >
 > **Para agentes:** este documento no se ejecuta tarea a tarea. Cada hito tiene su plan detallado (superpowers:writing-plans), que se escribe justo antes de construirlo y se ejecuta con superpowers:subagent-driven-development o superpowers:executing-plans.
 
@@ -160,9 +160,9 @@
 | Id | Nombre | Entregable | Depende de | Tamaño |
 |---|---|---|---|---|
 | H0a | Base del repositorio y pico en la máquina de build | Entorno aislado; .gitignore, SECURITY.md, README, LICENSE, hooks y página de presentación; informe parcial del pico (P1, P5 y P6) | Aprobación de F1 | M |
-| H0b | Pico en el teléfono, en Cloudflare y en VE | Informe completo del pico y sus cambios a DESIGN.md | H0a; teléfono y cuenta de Cloudflare | M, más 3 a 5 días de calendario en VE |
+| H0b | Pico en el teléfono, en Cloudflare y en VE | Informe completo del pico y sus cambios a DESIGN.md, en tres tramos (A sin Cloudflare, B con la cuenta y C en VE) | H0a; teléfono y cuenta de Cloudflare | M, más 3 a 5 días de calendario en VE |
 | H1 | Contratos y cadena de evidencia sin teléfono | shared con vectores, verificador y CLI; núcleo Kotlin en la JVM; Worker de ingesta local; teléfono simulado | H0a | L |
-| H2 | Derechos sin red: primer APK de producto | Pack VE en borrador, validador y export; LegalEngine; M1, M3 y M4; variantes y build endurecido | H1 y H0b | M |
+| H2 | Derechos sin red: primer APK de producto | Pack VE en borrador, validador y export; LegalEngine; M1, M3 y M4; variantes y build endurecido | H1 y el tramo A de H0b (`f2-h0b-a`) | M |
 | H3a | Grabar sin red y respaldar con acuse | recorder, Keystore, vault.db, cola de subida en Kotlin, M2 y M7 base; Worker en dev | H2 | L |
 | H3b | PIN, bloqueo, errores diseñados, ubicación y M8 base | PIN y bloqueo, `FLAG_SECURE`, ubicación, errores diseñados, M8 base | H3a | M |
 | H4 | Contactos y bóveda inactiva | M9, W1 y W3, registro de accesos, Telegram, Web Push, Probar alerta | H3b y P8 (o la decisión de seguir con Telegram) | L |
@@ -173,7 +173,7 @@
 | H8a | Configuración inicial, ajustes y pasada de diseño | Configuración completa, M10 completo, inicio honesto y pasada de diseño | H7 | M |
 | H8b | Censura, aceptación de F2 y revisión de seguridad | APK de pruebas que pasa la aceptación con los hosts definitivos; informe de cierre de F2 | H8a | L |
 
-Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la regla de orden de los commits). Nada que dependa de MediaCodec, del servicio en primer plano o de la cola en el teléfono empieza antes de cerrar H0b.
+Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la regla de orden de los commits). Nada que dependa de MediaCodec, del servicio en primer plano o de la cola en el teléfono empieza antes de cerrar H0b. H2 empieza con el tramo A cerrado (`f2-h0b-a`); H3a espera a `f2-h0b`.
 
 ## Detalle de los hitos
 
@@ -216,6 +216,7 @@ Si el teléfono o la cuenta de Cloudflare tardan, H1 va antes que H0b (con la re
 
 - **Objetivo:** medir en el teléfono, en Cloudflare y en VE las incógnitas que pueden cambiar la arquitectura, y dejar cada respuesta en DESIGN.md antes de construir producto que dependa de ellas.
 - **Entregable:** `docs/pico/informe.md` completo (pregunta, medición y decisión por cada P, con marcadores en lugar de hosts reales) y los cambios a DESIGN.md que salen de él. Fuera del repo, los Workers y la página de prueba.
+- **Tramos (13-oct-2026):** A, sin Cloudflare: P1 en el teléfono, P2, P3, P4 sin subida, P5 en el teléfono, P6 en navegadores reales, P7 en la máquina y la parte de P8 que sale de OONI; cierra con la etiqueta `f2-h0b-a`. B, con la llave y el token: endurecimiento de la cuenta, hosts neutros, P9, P4 con subida, P7 en el teléfono y P6 en un host real; cierra con `f2-h0b`, con P8 en marcha o con Telegram declarado como canal principal. C: P8 con la persona en VE. Ver "Decisiones de H0b".
 - **Incluye:**
   - Cuenta de Cloudflare de la persona responsable (decisión 4), endurecida antes del primer despliegue: 2FA con llave física y token de API mínimo con caducidad. Antes de desplegar nada se decide cómo tener hosts neutros, porque el subdominio de workers.dev de esa cuenta no lo es. Claude despliega solo con wrangler y ese token, con la configuración fuera del repo (CFG-01).
   - Teléfono: instalar el banco con adb desde el portátil y correr su autoprueba (FTS5, cabecera de `vault.db`, firma del Keystore y su latencia con TEE y con StrongBox).
@@ -1053,7 +1054,7 @@ P1 (parte de la máquina de build), P5 (parte de la JVM y de Node) y P6 (parte d
 - Experimento:
   - El servicio sube con un latido por minuto que queda en el registro de tiempos.
   - Tras Detener, la cola se vacía con WorkManager.
-  - Doze: `adb shell dumpsys battery unplug` y después `adb shell dumpsys deviceidle force-idle`; al terminar, `adb shell dumpsys battery reset`.
+  - Doze: `adb shell dumpsys battery unplug` y después `adb shell dumpsys deviceidle force-idle`; al terminar, `adb shell dumpsys deviceidle unforce` y `adb shell dumpsys battery reset`.
   - Batería: con el teléfono desconectado del cable (adb inalámbrico, o lectura al reconectar), tras `adb shell dumpsys batterystats --reset`, 30 min con y sin una posición por minuto; se anotan brillo, red y temperatura, y se lee con `adb shell dumpsys batterystats`.
 - Criterio de éxito: ningún minuto sin subida mientras hay red; la cola se vacía tras Detener; con ubicación, 4 % de batería o menos en 30 min.
 - Plan B: si el fabricante mata el servicio, guía por fabricante y el aviso "Tu teléfono cerró la grabación a las HH:MM", que H3a implementa de todos modos.
@@ -1097,10 +1098,15 @@ P1 (parte de la máquina de build), P5 (parte de la JVM y de Node) y P6 (parte d
   - consentimiento explícito del riesgo;
   - una cuenta de Telegram secundaria;
   - desde su línea solo se usa un host desechable (un proyecto de Pages con nombre neutro que nunca será de producción, no se reutiliza y se borra al terminar), nunca los hosts operativos;
-  - el banco descarta el campo `from` y guarda solo el `chat_id` cifrado;
-  - al terminar se borran el bot, sus mensajes, el host y los datos;
+  - el banco guarda solo `chat.id` cifrado y descarta `from` y el resto de `chat` (nombre, apellido y usuario);
+  - el bot borra cada aviso antes de 48 h (Telegram no deja borrarlo después); al terminar, la persona borra el chat para los dos y se borran el bot, el host y los datos;
   - el informe del repo solo lleva agregados, sin ciudad ni horas;
-  - su identidad nunca entra al repo.
+  - su identidad nunca entra al repo;
+  - textos y título neutros, sin "Vigía", y sub de VAPID neutro;
+  - una ventana horaria acordada para los avisos, y las horas de llegada vuelven por un canal privado;
+  - antes de borrar el host, limpia en su navegador el service worker, la suscripción y el almacenamiento;
+  - los identificadores de su cuenta secundaria de Telegram entran en la lista privada de patrones;
+  - el consentimiento nombra el riesgo de probar resolvedores anticensura desde su línea, y los resolvedores se prueban también por IP.
 - Experimento:
   - Se suscribe en Chrome Android, en la página desechable, y al bot de prueba.
   - Durante 3 a 5 días, la Worker de prueba envía unos 30 avisos sin contenido a horas al azar. En Web Push, el service worker anota la hora de llegada; en Telegram se anota si llegó y el minuto aproximado.
@@ -1112,7 +1118,7 @@ P1 (parte de la máquina de build), P5 (parte de la JVM y de Node) y P6 (parte d
 **P9. Cloudflare**
 - Pregunta: ¿el candado de R2 impide borrar y sobrescribir, y con qué error? ¿Es puntual el cron cada minuto? ¿Quedan los registros sin URL ni IP? ¿Puede el respaldo en Pages usar los mismos D1 y R2?
 - Experimento:
-  - Un bucket de prueba con una regla de 1 día en `incidents/`: PUT, DELETE inmediato, otro PUT sobre la misma clave y DELETE tras vencer.
+  - Un bucket de prueba con una regla de 1 día en `i/`: PUT, DELETE inmediato, otro PUT sobre la misma clave y DELETE tras vencer.
   - Un cron `* * * * *` que anota la hora durante 24 h.
   - Una petición con un `accessId` marcador, que después se busca en Workers Logs y en las métricas, con `observability` desactivada.
   - El mismo Worker como proyecto de Pages en modo avanzado, con los mismos D1, R2 y límite de peticiones.
@@ -1179,7 +1185,7 @@ Vienen de dos revisiones (servidor y criptografía; cliente, app y bóveda) y de
 | SUM-07 | Gradle | Versiones exactas; wrapper con `distributionSha256Sum`; verification-metadata | Revisión de los build.gradle y del wrapper | H1, H2 |
 | OPS-01 | Cuenta de Cloudflare | Cuenta de la persona responsable (decisión 4); 2FA con llave; token mínimo con caducidad; hosts con nombre neutro (H0b); desplegar desde un árbol limpio; conectores con OAuth amplio solo con permiso de la persona responsable; revisar el registro de auditoría | Panel y `wrangler whoami` | H0b |
 | OPS-02 | Plan y abuso | Workers Paid antes del piloto; tope global de altas por hora sin IP, con su cota calculada; el alta en cola nunca impide grabar; limits en wrangler | Por encima del tope: 429 y el teléfono sigue grabando; plan visible en el panel | H1, H3a, H8b |
-| OPS-03 | Entorno de desarrollo | `wrangler dev` y Metro solo en 127.0.0.1; Playwright comparte la red del entorno de build, sin puertos publicados; el APK lleva el bundle dentro; nunca `expo start --tunnel` | `ss -ltnp`; una conexión desde fuera falla | H0a, H1, H2 |
+| OPS-03 | Entorno de desarrollo | `wrangler dev` y Metro solo en 127.0.0.1; Playwright comparte la red del entorno de build, sin puertos publicados; el APK lleva el bundle dentro; nunca `expo start --tunnel`. Excepción (14-oct-2026): P7 de H0b corre el Worker en la red interna `vigia-p7` (sin salida a internet ni puertos publicados), con netem desde un contenedor auxiliar de un solo uso con `NET_ADMIN` | `ss -ltnp`; una conexión desde fuera falla | H0a, H1, H2 |
 | VAR-01 | Variantes | release no compila con un pack en draft, sin interruptor; pruebas con la clave de firma de pruebas y la banda de borrador; la clave de escucha, `capturas` y los extras de debug solo en debug y pruebas | `release-check`; `apksigner`; prueba de Gradle sobre los conjuntos de fuentes y el `BuildConfig`; búsqueda en el APK en el primer release | H2, H3a |
 | DAT-01 | Datos de prueba | Grabaciones sin terceros en todas las pruebas de campo; clave de escucha de pruebas fuera del repo y destruida al cerrar F2; cada informe anota el audio subido; APK desinstalado de los teléfonos prestados | Informes; comprobación al devolver | H0b, H3a, H5a, H8b |
 | BOV-01C | Clave en la bóveda | Leer `#a` y `#k` una vez y validarlos; importar la clave no extraíble; `replaceState` antes de nada; nunca a storage, red ni consola | Hash vacío; `exportKey` falla; el historial se mide | H4 |
@@ -1270,7 +1276,7 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
 28. **Borrado:** estados programado, borrando y borrado; durante el borrado, la ingesta de ese incidente responde 409; nunca se ejecuta con una alerta activa del incidente o del teléfono, tampoco la falta de señales (CRON-01).
 29. **Falta de señales:** el servidor guarda la fecha de fin de la pausa y el plazo cuenta desde ella; las peticiones de un teléfono revocado no cuentan como señal (PRIV-01).
 
-**Al cerrar H0b, con la aprobación de su informe:** formato de audio y duración del fragmento (decisiones 20 y 29); dónde guarda la cola los sobres (Bases locales); librería HPKE; dónde verifica la app y, si es en Kotlin, la frase "un único código"; respaldo X25519 de la bóveda; si el PUT de un fragmento lleva firma de petición; qué duraciones se prueban en los fabricantes; viabilidad del respaldo en Pages; canal principal en VE.
+**Al cerrar H0b, con la aprobación de su informe:** formato de audio y duración del fragmento (decisiones 20 y 29); dónde guarda la cola los sobres (Bases locales); librería HPKE; dónde verifica la app (DESIGN.md, "Pruebas" y decisión 72); respaldo X25519 de la bóveda; si el PUT de un fragmento lleva firma de petición; qué duraciones se prueban en los fabricantes; viabilidad del respaldo en Pages; canal principal en VE.
 
 ## Decisiones de F1 (12-oct-2026)
 
@@ -1292,13 +1298,24 @@ DESIGN.md es la fuente de verdad, así que estos cambios se aplican en cuanto se
     6. contactos con iPhone, solo Telegram en F2 (H4);
     7. el borrador del pack VE lo redacta Claude y la persona responsable revisa el tono y las fuentes (H2).
 
+## Decisiones de H0b (13 y 14-oct-2026)
+
+Cambian lo que este plan dice antes; los textos de cada hito que suponen hosts en workers.dev se ajustan al cerrar el tramo B, con P9.
+
+1. **Teléfono y portátil:** Xiaomi o Redmi con Android 11 a 13; el portátil es Windows y los guiones son bloques de PowerShell para pegar.
+2. **Tramos:** sin llave física no se despliega nada en Cloudflare. H0b va en tres tramos: A (sin Cloudflare), B (con la llave y el token) y C (P8 con la persona en VE, que llega más adelante).
+3. **Cierre:** etiqueta `f2-h0b-a` al cerrar A, y H2 puede empezar; `f2-h0b` al cerrar B, con P8 en marcha o con Telegram declarado como canal principal. H3a espera a `f2-h0b`.
+4. **Hosts neutros:** proyectos de Pages con nombre neutro delante de Workers sin URL pública (DESIGN.md, decisión 74). No se cambia el subdominio de workers.dev de la cuenta.
+5. **P7:** netem en un contenedor auxiliar de un solo uso con `NET_ADMIN`, en la red interna `vigia-p7`; el Worker escucha en esa red y no en 127.0.0.1 (excepción acotada a OPS-03).
+6. **Cuentas del teléfono:** el teléfono de pruebas lleva cuentas reales (riesgo aceptado; el detalle va en el archivo privado) y, con la depuración USB activada, no sirve para protegerse. El banco no lee identificadores del aparato ni de las cuentas.
+
 ## Qué aporta la persona responsable y cuándo
 
 | Recurso o decisión | Para qué | Cuándo | Si no llega |
 |---|---|---|---|
 | Pasos de H0a: registro privado fuera de la máquina o cifrado, exclusión de sesiones y ajustes de GitHub | ENV-01 y SUM-06 | H0a | H0a no cierra |
 | Proyecto de Pages `vigiaapp` conectado al repo, solo con acceso a Vigia | Publicar la página de presentación | H0a | La página espera |
-| Teléfono Android de gama baja con SIM y datos y la depuración USB activada | H0b y todos los hitos móviles | H0b | H1 se adelanta; H2 no empieza |
+| Teléfono Android de gama baja con SIM y datos y la depuración USB activada (con cuentas reales: riesgo aceptado el 14-oct-2026; el detalle va en el archivo privado) | H0b y todos los hitos móviles | H0b | H1 se adelanta; H2 no empieza |
 | adb en el portátil (USB o depuración inalámbrica en la red local) y ejecutar los guiones de adb | Instalar APK, Doze, logcat, `run-as`, capturas, pruebas instrumentadas y, en F4, Maestro | H0b | Muchos criterios no se pueden comprobar |
 | Cuenta de Cloudflare de la persona responsable, con 2FA por llave y token mínimo | Workers de prueba, R2, cron y canales reales | H0b | H1 se adelanta; P8 y P9 esperan |
 | Bot de Telegram de prueba y luego el definitivo, con nombre neutro (token por un canal privado) | P8 y H4 | H0b y H4 | Solo Web Push |
