@@ -1,0 +1,6 @@
+{
+  "artifact": "sitio/demo/index.html",
+  "bytes": 218127,
+  "sha256": "bbee2c1dd40bc3dd2ce8c7c12cc04d771d93163b39adabba894216d423cf3302",
+  "csp": "default-src 'none'; script-src 'sha256-2EQGwEzyurOV1T6rRIHzxknHptcZphOed6+Bgf3HISE='; style-src 'sha256-9jBj71Oba8TqOJheSCV0kRH6IIYE7gOz0BFur+ERAYw='; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+}

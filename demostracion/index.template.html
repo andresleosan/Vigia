@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="__CSP__">
+<title>Demostración de evidencia</title>
+<link rel="icon" href="data:,">
+<!-- STYLE -->
+</head>
+<body>
+<header class="topbar"><span class="wordmark" id="wordmark">Vigía <span>/ Demostración</span></span><button id="reset" class="text-button">Reiniciar demo</button></header>
+<div class="prototype" role="note"><strong>Prototipo en construcción.</strong> Todavía no lo uses para protegerte.</div>
+<div class="layout">
+<aside class="sidebar">
+  <nav aria-label="Recorrido de la demostración">
+    <ol class="steps">
+      <li id="step-1" aria-current="step"><span class="step-number">1</span><span>Sesión de prueba<small>Crear y respaldar</small></span></li>
+      <li id="step-2"><span class="step-number">2</span><span>Aviso simulado<small>Ver como contacto</small></span></li>
+      <li id="step-3"><span class="step-number">3</span><span>Evidencia<small>Comprobar y escuchar</small></span></li>
+    </ol>
+  </nav>
+  <div class="scope"><h2>Qué estás probando</h2><p>El cifrado, las firmas y la verificación usan el núcleo existente de Vigía.</p><p>La captura, el respaldo y el aviso se representan con datos de prueba. No hay un teléfono ni un servidor conectados.</p><p>Los derechos siguen pendientes de validación jurídica.</p></div>
+</aside>
+<main id="main">
+<section id="session" aria-labelledby="session-title">
+  <p class="context">Vista del teléfono · Simulación</p>
+  <h1 id="session-title" tabindex="-1">De la sesión a la evidencia</h1>
+  <p class="lead">Prepara una sesión ficticia y sigue lo que recibiría un contacto de confianza.</p>
+  <div class="session-card">
+    <div class="card-heading"><h2>Sesión de prueba</h2><span class="tag">Datos sintéticos</span></div>
+    <p class="muted">12 oct 2026 · Escenario fijo de demostración</p>
+    <div class="counter"><span id="session-count">0</span><span>de 3 fragmentos<br><small>Tono sintético, sin voces</small></span></div>
+    <p id="session-state" data-testid="session-state" class="session-state" role="status">Lista para preparar</p>
+    <ol class="axes">
+      <li><span>Sesión</span><strong id="axis-session">Sin preparar</strong></li>
+      <li><span>Respaldo</span><strong id="axis-backup">No realizado</strong></li>
+      <li><span>Aviso</span><strong>Sin activar</strong></li>
+    </ol>
+    <div id="backup-note" class="notice" hidden>Respaldo simulado. Los acuses de prueba se crearon en este navegador. No se subió ningún archivo.</div>
+    <button id="prepare" class="primary">Preparar sesión de prueba</button>
+    <button id="backup" class="primary" hidden>Simular respaldo</button>
+    <button id="show-notice" class="primary" hidden>Mostrar aviso de prueba</button>
+  </div>
+  <p class="footnote">No se solicita micrófono, ubicación ni contactos. Todo se prepara en memoria y se descarta al reiniciar o cerrar.</p>
+</section>
+<section id="notice" aria-labelledby="notice-title" hidden>
+  <p class="context">Vista del contacto · Simulación</p>
+  <h1 id="notice-title" tabindex="-1">Un aviso para saber por dónde empezar</h1>
+  <p class="lead">Así podría entrar tu contacto a la evidencia. Este aviso no se ha enviado a nadie.</p>
+  <div class="message-card">
+    <div class="message-top"><span class="message-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 9-9 9-9-9zM12 8v5M12 16h.01"/></svg></span><div><h2>Aviso de prueba</h2><p>Contacto de demostración</p></div><span class="tag">Simulado</span></div>
+    <p class="message-body">Hay una sesión de prueba disponible.</p>
+    <p>Abre la evidencia para comprobar sus fragmentos antes de escuchar.</p>
+    <div class="receipt"><span class="status-dot"></span>Representación de una entrega, sin Telegram ni notificaciones reales.</div>
+    <button id="open-evidence" class="primary">Abrir evidencia de prueba</button>
+  </div>
+  <div class="notice">Abrir un aviso no significa que la persona esté bien. La demo no detecta emergencias ni activa temporizadores.</div>
+</section>
+<section id="evidence" aria-labelledby="evidence-title" hidden>
+  <p class="context">Vista del contacto · Datos sintéticos</p>
+  <h1 id="evidence-title" tabindex="-1">Evidencia de prueba</h1>
+  <p class="lead">Primero comprobar. Después escuchar solo lo que verifica.</p>
+  <fieldset class="cases"><legend>Prueba qué pasa si cambia el paquete</legend><div class="case-buttons">
+    <button data-case="original" aria-pressed="true">Original</button>
+    <button data-case="alterado" aria-pressed="false">Alterar fragmento 2</button>
+    <button data-case="sin-cierre" aria-pressed="false">Quitar cierre</button>
+  </div></fieldset>
+  <div id="report" class="report" aria-live="polite">
+    <div class="result-heading"><span id="result-icon" class="result-icon" aria-hidden="true"></span><div><h2 id="verification-state" data-testid="verification-state">Comprobando…</h2><p id="result-caption">Ejecutando el verificador existente.</p></div></div>
+    <div class="verified-metric"><strong id="verified-count" data-testid="verified-count">0 de 3</strong><span>fragmentos que verifican</span></div>
+    <ul id="findings" data-testid="findings" class="findings"></ul>
+  </div>
+  <div id="fragments" class="fragments"></div>
+  <p class="footnote">El sonido es un tono sintético. La comprobación acredita la integridad de estos datos de prueba; no demuestra que un relato sea verdadero ni garantiza protección.</p>
+  <details id="technical"><summary>Ver el informe del núcleo</summary><p id="engine-summary"></p><p class="muted">Huella efímera del teléfono de prueba</p><code id="fingerprint" data-testid="device-fingerprint"></code><p class="muted">Firmas del teléfono y acuses del servidor: claves de prueba generadas aquí. Zona horaria: UTC. No se consultan servicios externos.</p></details>
+</section>
+<p id="error" class="error" role="alert" hidden></p>
+</main>
+</div>
+<footer>Demostración local. Las pruebas físicas del grabador y los hitos de producto siguen pendientes.</footer>
+<!-- SCRIPT -->
+</body>
+</html>

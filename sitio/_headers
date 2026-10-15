@@ -5,3 +5,17 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
+
+# La demo sustituye la politica general solo en sus rutas exactas.
+/demo
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-2EQGwEzyurOV1T6rRIHzxknHptcZphOed6+Bgf3HISE='; style-src 'sha256-9jBj71Oba8TqOJheSCV0kRH6IIYE7gOz0BFur+ERAYw='; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+/demo/
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-2EQGwEzyurOV1T6rRIHzxknHptcZphOed6+Bgf3HISE='; style-src 'sha256-9jBj71Oba8TqOJheSCV0kRH6IIYE7gOz0BFur+ERAYw='; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+/demo/index.html
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-2EQGwEzyurOV1T6rRIHzxknHptcZphOed6+Bgf3HISE='; style-src 'sha256-9jBj71Oba8TqOJheSCV0kRH6IIYE7gOz0BFur+ERAYw='; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Frame-Options: DENY
