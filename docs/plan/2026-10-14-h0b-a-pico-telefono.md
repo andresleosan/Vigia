@@ -15,6 +15,17 @@
 
 **Spec:** `docs/plan/2026-10-12-plan-maestro-f2.md` (H0b, "Pico técnico" y requisitos de seguridad), `DESIGN.md`, `docs/pico/informe.md` y las decisiones de la persona responsable del 13 y 14-oct-2026 (abajo), que mandan sobre el plan maestro donde lo cambian (la tarea 1 las lleva a los documentos).
 
+## Estado de la ejecución (15-oct-2026)
+
+Para retomar. El registro detallado de la ejecución está fuera del repo, en la máquina de trabajo; aquí va lo esencial.
+
+- Hechas las tareas 1 a 12: entorno, clave de escucha de pruebas, banco con P2 a P6 y P8, y arnés de P7. Commits del repo: aeeef12, 6a21d07 y 85fa392. El banco (repo local, sin remoto) va en ac51574.
+- P7 (tarea 11), provisional hasta el informe: la duración de fragmento más corta que cumple es 4 s. Con 2 s, el retraso es de 2 fragmentos o menos el 91,6 % del tiempo (se pide el 95 %); con 4 y 8 s, el 100 %. Sin reordenamientos y sin plan B.
+- Revisión independiente del código de las tareas 1 a 12: 0 críticos. El importante (el APK permitía la copia de seguridad de Android, que con cuentas reales sube la carpeta del banco a la nube) está arreglado en ac51574, y `compilar.sh` ahora lo exige. Hay además un arreglo preventivo en P5 y seis menores anotados para H3a y el informe.
+- Tarea 13, pasos 1 y 2: los APK de ac51574, compilados desde un clon limpio (no depurables, sin copia de seguridad, con todas las pruebas en verde), entregados con sus sumas. La guía de los pasos 3 a 54 la tiene la persona responsable, fuera del repo.
+- Siguiente: la persona responsable hace la sesión 1 con el teléfono (tarea 13, pasos 3 a 54) y después Claude analiza (pasos A1 a A7). Luego vienen las sesiones 2 y 3 (tareas 14 y 15) y la tarea 16 (informe, decisiones 75 a 80 de DESIGN.md y la etiqueta f2-h0b-a, con su aprobación).
+- No se ha desplegado nada y Cloudflare no se ha tocado: eso es el tramo B, con la llave.
+
 ## Decisiones del 13 y 14-oct-2026 (persona responsable)
 
 1. Teléfono de pruebas: Xiaomi/Redmi con Android 11 a 13. Portátil Windows: los guiones son bloques de PowerShell para pegar.
@@ -44,7 +55,7 @@ P8 no decide nada en este tramo: la tabla de OONI (tarea 12) va al informe y el 
 
 ## Decisiones de integración (Claude, 14-oct-2026)
 
-Dudas de quienes escribieron las tareas que se resuelven con el criterio por defecto. La persona responsable puede cambiar cualquiera al revisar el plan; las tres últimas (21 a 23) son suyas y se le preguntan antes de empezar.
+Dudas de quienes escribieron las tareas que se resuelven con el criterio por defecto. La persona responsable puede cambiar cualquiera al revisar el plan; las tres últimas (21 a 23) eran suyas, y el 14-oct-2026 las delegó en el criterio más conveniente (lo decidido va en cada una).
 
 1. Las sesiones miden siempre el APK del último commit del banco (tarea 13, paso 1). Si el banco cambia entre sesiones, se recompila y la persona responsable reinstala (tarea 13, pasos 14, 15 y 53).
 2. Los tamaños de APK y los recuentos de pruebas que da cada tarea se midieron sobre el andamio con solo esa tarea (o las de su mismo bloque). En la ejecución real cambian un poco: cuenta `salida: 0`, las fichas y que no falle ninguna prueba.
