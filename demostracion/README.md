@@ -1,5 +1,40 @@
 # Demostración de evidencia
 
+## Grabación web de prueba
+
+`/demo/grabar/` es una prueba independiente: Grabar (permiso explícito), detener
+manualmente o a los 15 segundos, escuchar y descartar. Usa `getUserMedia` y
+`MediaRecorder` nativos. Conserva el MIME elegido por el navegador y reúne los
+bloques como una única toma, sin fingir fragmentos ADTS. No aplica el verificador
+criptográfico ni genera acuses para ese audio.
+
+La aplicación mantiene el audio en memoria, con un tope adicional de 2 MiB.
+No escribe audio ni claves a storage, caché, archivos o red; no ofrece descarga,
+respaldo, alertas ni telemetría. Esto describe el código de la página, no promete
+control forense sobre la memoria, archivos temporales o paginación del navegador.
+Al descartar, cancelar, ocultar la página o salir se invalidan callbacks, se
+detienen pistas y temporizadores, se vacían bloques y se revocan las URLs.
+Un permiso resuelto tarde se cierra sin usarlo. No garantiza continuidad con
+pantalla bloqueada o en segundo plano; una interrupción descarta la prueba.
+
+La excepción `microphone=(self)` se limita a las tres rutas exactas del grabador;
+el resto conserva `microphone=()`, cámara y ubicación bloqueadas. Se mantienen
+`connect-src 'none'`, hashes CSP y medios `blob:`. El build emite también
+`vigia-grabador.html` y `grabador-manifest.json`, para copiar a
+`sitio/demo/grabar/index.html` y `demostracion/grabador-artifact.json`.
+
+QA local aislada: `node_modules/.bin/playwright test --config grabador.config.mjs`.
+En Chromium, el fixture sustituye la entrada por un oscilador conectado a
+`MediaStreamDestination`, sin salida física. En Firefox se usa el dispositivo
+sintético interno (`media.navigator.streams.fake`) de un perfil efímero de QA,
+sin exponer hardware al contenedor. MediaRecorder y sus códecs son nativos.
+El WebKit Linux de esta imagen no incluye MediaRecorder: solo se comprueban
+degradación, contraste y cabeceras; no se afirma cobertura de captura en Safari.
+Esto no equivale a validar hardware o teléfonos reales. La política HTTP se
+comprueba aparte porque el fixture elude la petición nativa de permiso.
+
+## Recorrido con datos sintéticos
+
 Recorrido independiente de la página pública: sesión sintética, aviso simulado y verificación real de tres fragmentos. No cierra H0b, H2, H4 ni H5b.
 
 - Reutiliza el fixture efímero de H1 y el verificador de packages/shared. El tono se genera con ffmpeg lavfi, sin voces ni micrófono.

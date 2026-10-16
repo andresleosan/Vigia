@@ -1,0 +1,6 @@
+{
+  "artifact": "sitio/demo/grabar/index.html",
+  "bytes": 17973,
+  "sha256": "f8d482ec58070a1a5b3bec83afc12141e1eafb810cd72fe835301b1862c72872",
+  "csp": "default-src 'none'; script-src 'sha256-9LFHgjAKpqXbaEPUlfvI3AFboOruHuv+gympuu/CIyI='; style-src 'sha256-uyy6KJ3tP8bljemWZiYtMWcalsdsFjymKjN2P9SKNG4='; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+}

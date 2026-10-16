@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="__CSP__">
+<title>Grabación de prueba · Vigía</title>
+<link rel="icon" href="data:,">
+<!-- STYLE -->
+</head>
+<body>
+<header class="topbar"><span class="wordmark">Vigía <span>/ Grabación de prueba</span></span><a class="text-button" href="../">Ver demo sintética</a></header>
+<div class="prototype" role="note"><strong>Prototipo en construcción.</strong> Todavía no lo uses para protegerte.</div>
+<main class="recorder-layout">
+  <h1>Prueba tu micrófono</h1>
+  <p class="lead">Graba hasta 15 segundos, escucha y descarta. Tú decides cuándo activar el micrófono.</p>
+  <div class="session-card" aria-labelledby="record-title">
+    <div class="card-heading"><h2 id="record-title">Una toma breve</h2><span class="tag">Solo en esta pantalla</span></div>
+    <div class="record-clock"><output id="record-time" role="timer" aria-label="Segundos grabados" aria-live="off">00</output><span>de 15 segundos</span></div>
+    <p id="record-state" class="session-state" role="status" aria-live="polite">Lista para grabar</p>
+    <p id="record-note">El permiso se solicita al pulsar Grabar.</p>
+    <div class="record-actions">
+      <button id="record-start" class="primary">Grabar hasta 15 segundos</button>
+      <button id="record-stop" class="primary" hidden>Detener grabación</button>
+      <button id="record-play" class="primary" hidden>Escuchar grabación</button>
+      <button id="record-discard" class="secondary" hidden>Descartar grabación</button>
+    </div>
+    <div id="record-player" hidden><audio id="record-audio" controls preload="none" controlslist="nodownload" aria-label="Grabación de esta prueba"></audio></div>
+    <p id="record-error" class="error" role="alert" hidden></p>
+  </div>
+  <div class="notice"><strong>Solo una prueba local.</strong> Mantén esta pantalla abierta y visible. Al ocultarla, salir o descartar, se elimina la toma de la aplicación. Si se interrumpe el navegador, puedes perderla.</div>
+  <p class="footnote">La página mantiene el audio en memoria, sin guardarlo ni enviarlo. No ofrece respaldo, alertas ni verificación criptográfica de esta grabación.</p>
+</main>
+<footer>La demo de evidencia usa datos sintéticos. Esta prueba permite escuchar una toma real de tu micrófono.</footer>
+<!-- SCRIPT -->
+</body>
+</html>

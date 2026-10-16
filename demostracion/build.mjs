@@ -17,7 +17,8 @@ const require=createRequire(resolve(dir,'../pruebas/sitio/package.json'));
 const {build}=require('esbuild');
 const compiled=await build({entryPoints:[join(dir,'app.ts')],bundle:true,write:false,platform:'browser',format:'iife',target:['es2022'],minify:true,legalComments:'none',define:{__TONO_BASE64__:JSON.stringify(readFileSync(tono).toString('base64'))}});
 const js=compiled.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
-const css=readFileSync(join(dir,'styles.css'),'utf8');
+// HTML normaliza CR/CRLF a LF antes de comprobar hashes CSP.
+const css=readFileSync(join(dir,'styles.css'),'utf8').replace(/\r\n?/g,'\n');
 const hash=x=>createHash('sha256').update(x).digest('base64');
 const csp="default-src 'none'; script-src 'sha256-"+hash(js)+"'; style-src 'sha256-"+hash(css)+"'; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'";
 const template=readFileSync(join(dir,'index.template.html'),'utf8');
@@ -26,3 +27,14 @@ writeFileSync(join(out,'vigia-demo.html'),html);
 const manifest={artifact:'sitio/demo/index.html',bytes:Buffer.byteLength(html),sha256:createHash('sha256').update(html).digest('hex'),csp:csp+"; frame-ancestors 'none'"};
 writeFileSync(join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log(JSON.stringify({...manifest,output:join(out,'vigia-demo.html'),toneBytes:readFileSync(tono).length}));
+
+// Grabador aislado: otro bundle y otra ruta. No contiene fixtures ni claves.
+const recorderBuild=await build({entryPoints:[join(dir,'grabador.ts')],bundle:true,write:false,platform:'browser',format:'iife',target:['es2022'],minify:true,legalComments:'none'});
+const recorderJs=recorderBuild.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
+const recorderCss=css+'\n'+readFileSync(join(dir,'grabador.css'),'utf8').replace(/\r\n?/g,'\n');
+const recorderCsp="default-src 'none'; script-src 'sha256-"+hash(recorderJs)+"'; style-src 'sha256-"+hash(recorderCss)+"'; img-src data:; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'";
+const recorderHtml=readFileSync(join(dir,'grabador.template.html'),'utf8').replace('__CSP__',()=>recorderCsp).replace('<!-- STYLE -->',()=>'<style>'+recorderCss+'</style>').replace('<!-- SCRIPT -->',()=>'<script>'+recorderJs+'</script>');
+writeFileSync(join(out,'vigia-grabador.html'),recorderHtml);
+const recorderManifest={artifact:'sitio/demo/grabar/index.html',bytes:Buffer.byteLength(recorderHtml),sha256:createHash('sha256').update(recorderHtml).digest('hex'),csp:recorderCsp+"; frame-ancestors 'none'"};
+writeFileSync(join(out,'grabador-manifest.json'),JSON.stringify(recorderManifest,null,2)+'\n');
+console.log(JSON.stringify({...recorderManifest,output:join(out,'vigia-grabador.html')}));
